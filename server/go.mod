@@ -1,6 +1,6 @@
 module github.com/KaranJayakumar/remember
 
-go 1.24.2
+go 1.24
 
 require (
 	github.com/bytedance/sonic v1.13.2 // indirect
