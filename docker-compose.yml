@@ -8,7 +8,6 @@ services:
     depends_on:
       app_database:
         condition: service_healthy
-
   app_database:
     image: postgres:latest
     ports:
@@ -18,7 +17,7 @@ services:
       POSTGRES_DB: remember
       POSTGRES_USER: user 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user"]
+      test: ["CMD-SHELL", "pg_isready -U user -d remember"]
       interval: 5s
       timeout: 5s
       retries: 5

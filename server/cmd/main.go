@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/KaranJayakumar/remember/ent"
+	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	"log"
 	"os"
@@ -19,4 +20,6 @@ func main() {
 	if err := client.Schema.WriteTo(ctx, os.Stdout); err != nil {
 		log.Fatalf("failed printing schema changes: %v", err)
 	}
+	router := gin.Default()
+	router.Run()
 }
