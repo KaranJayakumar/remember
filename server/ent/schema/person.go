@@ -1,20 +1,31 @@
 package schema
 
-import "entgo.io/ent"
+import (
+    "entgo.io/ent"
+    "entgo.io/ent/schema"
+    "entgo.io/ent/dialect/entsql"
+    "entgo.io/ent/schema/field"
+    "entgo.io/ent/schema/edge"
+)
 
-// Person holds the schema definition for the Person entity.
 type Person struct {
-	ent.Schema
+    ent.Schema
 }
 
-// Fields of the Person.
 func (Person) Fields() []ent.Field {
-  return []ent.Field(
-    field.Text("name")
-  )
+    return []ent.Field{
+        field.String("name"),
+    }
 }
 
-// Edges of the Person.
 func (Person) Edges() []ent.Edge {
-	return nil
+    return []ent.Edge{
+        edge.To("memories", Memory.Type),
+    }
+}
+
+func (Person) Annotations() []schema.Annotation {
+    return []schema.Annotation{
+        entsql.Annotation{Table: "People"},
+    }
 }

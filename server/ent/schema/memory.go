@@ -1,20 +1,34 @@
 package schema
 
-import "entgo.io/ent"
+import (
+    "entgo.io/ent"
+    "entgo.io/ent/schema"
+    "entgo.io/ent/dialect/entsql"
+    "entgo.io/ent/schema/field"
+    "entgo.io/ent/schema/edge"
+)
 
-// Memory holds the schema definition for the Memory entity.
 type Memory struct {
-	ent.Schema
+    ent.Schema
 }
 
-// Fields of the Memory.
 func (Memory) Fields() []ent.Field {
-  return []ent.Field(
-    field.Text("content")
-  )
+    return []ent.Field{
+        field.Text("content"),
+    }
 }
 
-// Edges of the Memory.
+func (Memory) Annotations() []schema.Annotation {
+    return []schema.Annotation{
+        entsql.Annotation{Table: "Memories"},
+    }
+}
+
 func (Memory) Edges() []ent.Edge {
-	return nil
+    return []ent.Edge{
+        edge.From("person", Person.Type).
+        Ref("memories").
+        Unique().
+        Required(),
+    }
 }
