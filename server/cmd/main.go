@@ -3,15 +3,16 @@ package main
 import (
 	"context"
 	"github.com/KaranJayakumar/remember/ent"
+	_ "github.com/lib/pq"
 	"log"
 	"os"
 )
 
 func main() {
-	client, err := ent.Open("postgres", "localhost port=5432 user=user dbname=remember password=password")
+	client, err := ent.Open("postgres", "host=app_database port=5432 user=user dbname=remember password=password sslmode=disable")
 
 	if err != nil {
-		log.Fatalf("failed connecting to mysql: %v", err)
+		log.Fatalf("failed connecting to postgres: %v", err)
 	}
 	defer client.Close()
 	ctx := context.Background()
