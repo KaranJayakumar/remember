@@ -23,9 +23,9 @@ func main() {
 		log.Fatalf("failed printing schema changes: %v", err)
 	}
 	router := gin.Default()
-	router.GET("/people", getConnections(client))
-	router.POST("/people/{id}", createConnection(client))
-	router.DELETE("/people", deleteConnection(client))
+	router.GET("/connection", getConnections(client))
+	router.POST("/connection", createConnection(client))
+	router.DELETE("/connection", deleteConnection(client))
 	router.Run()
 }
 
