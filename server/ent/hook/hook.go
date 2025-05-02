@@ -9,6 +9,18 @@ import (
 	"github.com/KaranJayakumar/remember/ent"
 )
 
+// The ConnectionFunc type is an adapter to allow the use of ordinary
+// function as Connection mutator.
+type ConnectionFunc func(context.Context, *ent.ConnectionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ConnectionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ConnectionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ConnectionMutation", m)
+}
+
 // The MemoryFunc type is an adapter to allow the use of ordinary
 // function as Memory mutator.
 type MemoryFunc func(context.Context, *ent.MemoryMutation) (ent.Value, error)
@@ -19,18 +31,6 @@ func (f MemoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MemoryMutation", m)
-}
-
-// The PersonFunc type is an adapter to allow the use of ordinary
-// function as Person mutator.
-type PersonFunc func(context.Context, *ent.PersonMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f PersonFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.PersonMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PersonMutation", m)
 }
 
 // Condition is a hook condition function.

@@ -12,10 +12,10 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// Connection is the client for interacting with the Connection builders.
+	Connection *ConnectionClient
 	// Memory is the client for interacting with the Memory builders.
 	Memory *MemoryClient
-	// Person is the client for interacting with the Person builders.
-	Person *PersonClient
 
 	// lazily loaded.
 	client     *Client
@@ -147,8 +147,8 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.Connection = NewConnectionClient(tx.config)
 	tx.Memory = NewMemoryClient(tx.config)
-	tx.Person = NewPersonClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -158,7 +158,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Memory.QueryXXX(), the query will be executed
+// applies a query, for example: Connection.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

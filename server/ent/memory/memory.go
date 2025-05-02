@@ -14,17 +14,17 @@ const (
 	FieldID = "id"
 	// FieldContent holds the string denoting the content field in the database.
 	FieldContent = "content"
-	// EdgePerson holds the string denoting the person edge name in mutations.
-	EdgePerson = "person"
+	// EdgeConnection holds the string denoting the connection edge name in mutations.
+	EdgeConnection = "connection"
 	// Table holds the table name of the memory in the database.
 	Table = "Memories"
-	// PersonTable is the table that holds the person relation/edge.
-	PersonTable = "Memories"
-	// PersonInverseTable is the table name for the Person entity.
-	// It exists in this package in order to avoid circular dependency with the "person" package.
-	PersonInverseTable = "People"
-	// PersonColumn is the table column denoting the person relation/edge.
-	PersonColumn = "person_memories"
+	// ConnectionTable is the table that holds the connection relation/edge.
+	ConnectionTable = "Memories"
+	// ConnectionInverseTable is the table name for the Connection entity.
+	// It exists in this package in order to avoid circular dependency with the "connection" package.
+	ConnectionInverseTable = "Connections"
+	// ConnectionColumn is the table column denoting the connection relation/edge.
+	ConnectionColumn = "connection_memories"
 )
 
 // Columns holds all SQL columns for memory fields.
@@ -36,7 +36,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "Memories"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"person_memories",
+	"connection_memories",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -67,16 +67,16 @@ func ByContent(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldContent, opts...).ToFunc()
 }
 
-// ByPersonField orders the results by person field.
-func ByPersonField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByConnectionField orders the results by connection field.
+func ByConnectionField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPersonStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newConnectionStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newPersonStep() *sqlgraph.Step {
+func newConnectionStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PersonInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, PersonTable, PersonColumn),
+		sqlgraph.To(ConnectionInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, ConnectionTable, ConnectionColumn),
 	)
 }

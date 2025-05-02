@@ -8,8 +8,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/KaranJayakumar/remember/ent/connection"
 	"github.com/KaranJayakumar/remember/ent/memory"
-	"github.com/KaranJayakumar/remember/ent/person"
 )
 
 // Memory is the model entity for the Memory schema.
@@ -21,29 +21,29 @@ type Memory struct {
 	Content string `json:"content,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MemoryQuery when eager-loading is set.
-	Edges           MemoryEdges `json:"edges"`
-	person_memories *int
-	selectValues    sql.SelectValues
+	Edges               MemoryEdges `json:"edges"`
+	connection_memories *int
+	selectValues        sql.SelectValues
 }
 
 // MemoryEdges holds the relations/edges for other nodes in the graph.
 type MemoryEdges struct {
-	// Person holds the value of the person edge.
-	Person *Person `json:"person,omitempty"`
+	// Connection holds the value of the connection edge.
+	Connection *Connection `json:"connection,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// PersonOrErr returns the Person value or an error if the edge
+// ConnectionOrErr returns the Connection value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e MemoryEdges) PersonOrErr() (*Person, error) {
-	if e.Person != nil {
-		return e.Person, nil
+func (e MemoryEdges) ConnectionOrErr() (*Connection, error) {
+	if e.Connection != nil {
+		return e.Connection, nil
 	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: person.Label}
+		return nil, &NotFoundError{label: connection.Label}
 	}
-	return nil, &NotLoadedError{edge: "person"}
+	return nil, &NotLoadedError{edge: "connection"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -55,7 +55,7 @@ func (*Memory) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case memory.FieldContent:
 			values[i] = new(sql.NullString)
-		case memory.ForeignKeys[0]: // person_memories
+		case memory.ForeignKeys[0]: // connection_memories
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -86,10 +86,10 @@ func (m *Memory) assignValues(columns []string, values []any) error {
 			}
 		case memory.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field person_memories", value)
+				return fmt.Errorf("unexpected type %T for edge-field connection_memories", value)
 			} else if value.Valid {
-				m.person_memories = new(int)
-				*m.person_memories = int(value.Int64)
+				m.connection_memories = new(int)
+				*m.connection_memories = int(value.Int64)
 			}
 		default:
 			m.selectValues.Set(columns[i], values[i])
@@ -104,9 +104,9 @@ func (m *Memory) Value(name string) (ent.Value, error) {
 	return m.selectValues.Get(name)
 }
 
-// QueryPerson queries the "person" edge of the Memory entity.
-func (m *Memory) QueryPerson() *PersonQuery {
-	return NewMemoryClient(m.config).QueryPerson(m)
+// QueryConnection queries the "connection" edge of the Memory entity.
+func (m *Memory) QueryConnection() *ConnectionQuery {
+	return NewMemoryClient(m.config).QueryConnection(m)
 }
 
 // Update returns a builder for updating this Memory.

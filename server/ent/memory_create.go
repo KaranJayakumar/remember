@@ -9,8 +9,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/KaranJayakumar/remember/ent/connection"
 	"github.com/KaranJayakumar/remember/ent/memory"
-	"github.com/KaranJayakumar/remember/ent/person"
 )
 
 // MemoryCreate is the builder for creating a Memory entity.
@@ -26,15 +26,15 @@ func (mc *MemoryCreate) SetContent(s string) *MemoryCreate {
 	return mc
 }
 
-// SetPersonID sets the "person" edge to the Person entity by ID.
-func (mc *MemoryCreate) SetPersonID(id int) *MemoryCreate {
-	mc.mutation.SetPersonID(id)
+// SetConnectionID sets the "connection" edge to the Connection entity by ID.
+func (mc *MemoryCreate) SetConnectionID(id int) *MemoryCreate {
+	mc.mutation.SetConnectionID(id)
 	return mc
 }
 
-// SetPerson sets the "person" edge to the Person entity.
-func (mc *MemoryCreate) SetPerson(p *Person) *MemoryCreate {
-	return mc.SetPersonID(p.ID)
+// SetConnection sets the "connection" edge to the Connection entity.
+func (mc *MemoryCreate) SetConnection(c *Connection) *MemoryCreate {
+	return mc.SetConnectionID(c.ID)
 }
 
 // Mutation returns the MemoryMutation object of the builder.
@@ -74,8 +74,8 @@ func (mc *MemoryCreate) check() error {
 	if _, ok := mc.mutation.Content(); !ok {
 		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "Memory.content"`)}
 	}
-	if len(mc.mutation.PersonIDs()) == 0 {
-		return &ValidationError{Name: "person", err: errors.New(`ent: missing required edge "Memory.person"`)}
+	if len(mc.mutation.ConnectionIDs()) == 0 {
+		return &ValidationError{Name: "connection", err: errors.New(`ent: missing required edge "Memory.connection"`)}
 	}
 	return nil
 }
@@ -107,21 +107,21 @@ func (mc *MemoryCreate) createSpec() (*Memory, *sqlgraph.CreateSpec) {
 		_spec.SetField(memory.FieldContent, field.TypeString, value)
 		_node.Content = value
 	}
-	if nodes := mc.mutation.PersonIDs(); len(nodes) > 0 {
+	if nodes := mc.mutation.ConnectionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   memory.PersonTable,
-			Columns: []string{memory.PersonColumn},
+			Table:   memory.ConnectionTable,
+			Columns: []string{memory.ConnectionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(person.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(connection.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.person_memories = &nodes[0]
+		_node.connection_memories = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

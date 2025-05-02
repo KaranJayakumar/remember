@@ -123,21 +123,21 @@ func ContentContainsFold(v string) predicate.Memory {
 	return predicate.Memory(sql.FieldContainsFold(FieldContent, v))
 }
 
-// HasPerson applies the HasEdge predicate on the "person" edge.
-func HasPerson() predicate.Memory {
+// HasConnection applies the HasEdge predicate on the "connection" edge.
+func HasConnection() predicate.Memory {
 	return predicate.Memory(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, PersonTable, PersonColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, ConnectionTable, ConnectionColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasPersonWith applies the HasEdge predicate on the "person" edge with a given conditions (other predicates).
-func HasPersonWith(preds ...predicate.Person) predicate.Memory {
+// HasConnectionWith applies the HasEdge predicate on the "connection" edge with a given conditions (other predicates).
+func HasConnectionWith(preds ...predicate.Connection) predicate.Memory {
 	return predicate.Memory(func(s *sql.Selector) {
-		step := newPersonStep()
+		step := newConnectionStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

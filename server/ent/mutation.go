@@ -10,8 +10,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/KaranJayakumar/remember/ent/connection"
 	"github.com/KaranJayakumar/remember/ent/memory"
-	"github.com/KaranJayakumar/remember/ent/person"
 	"github.com/KaranJayakumar/remember/ent/predicate"
 )
 
@@ -24,23 +24,496 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeMemory = "Memory"
-	TypePerson = "Person"
+	TypeConnection = "Connection"
+	TypeMemory     = "Memory"
 )
+
+// ConnectionMutation represents an operation that mutates the Connection nodes in the graph.
+type ConnectionMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *int
+	name            *string
+	parentUserId    *string
+	clearedFields   map[string]struct{}
+	memories        map[int]struct{}
+	removedmemories map[int]struct{}
+	clearedmemories bool
+	done            bool
+	oldValue        func(context.Context) (*Connection, error)
+	predicates      []predicate.Connection
+}
+
+var _ ent.Mutation = (*ConnectionMutation)(nil)
+
+// connectionOption allows management of the mutation configuration using functional options.
+type connectionOption func(*ConnectionMutation)
+
+// newConnectionMutation creates new mutation for the Connection entity.
+func newConnectionMutation(c config, op Op, opts ...connectionOption) *ConnectionMutation {
+	m := &ConnectionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeConnection,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withConnectionID sets the ID field of the mutation.
+func withConnectionID(id int) connectionOption {
+	return func(m *ConnectionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Connection
+		)
+		m.oldValue = func(ctx context.Context) (*Connection, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Connection.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withConnection sets the old Connection of the mutation.
+func withConnection(node *Connection) connectionOption {
+	return func(m *ConnectionMutation) {
+		m.oldValue = func(context.Context) (*Connection, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ConnectionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ConnectionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ConnectionMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ConnectionMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Connection.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *ConnectionMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *ConnectionMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Connection entity.
+// If the Connection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ConnectionMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *ConnectionMutation) ResetName() {
+	m.name = nil
+}
+
+// SetParentUserId sets the "parentUserId" field.
+func (m *ConnectionMutation) SetParentUserId(s string) {
+	m.parentUserId = &s
+}
+
+// ParentUserId returns the value of the "parentUserId" field in the mutation.
+func (m *ConnectionMutation) ParentUserId() (r string, exists bool) {
+	v := m.parentUserId
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldParentUserId returns the old "parentUserId" field's value of the Connection entity.
+// If the Connection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ConnectionMutation) OldParentUserId(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldParentUserId is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldParentUserId requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldParentUserId: %w", err)
+	}
+	return oldValue.ParentUserId, nil
+}
+
+// ResetParentUserId resets all changes to the "parentUserId" field.
+func (m *ConnectionMutation) ResetParentUserId() {
+	m.parentUserId = nil
+}
+
+// AddMemoryIDs adds the "memories" edge to the Memory entity by ids.
+func (m *ConnectionMutation) AddMemoryIDs(ids ...int) {
+	if m.memories == nil {
+		m.memories = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.memories[ids[i]] = struct{}{}
+	}
+}
+
+// ClearMemories clears the "memories" edge to the Memory entity.
+func (m *ConnectionMutation) ClearMemories() {
+	m.clearedmemories = true
+}
+
+// MemoriesCleared reports if the "memories" edge to the Memory entity was cleared.
+func (m *ConnectionMutation) MemoriesCleared() bool {
+	return m.clearedmemories
+}
+
+// RemoveMemoryIDs removes the "memories" edge to the Memory entity by IDs.
+func (m *ConnectionMutation) RemoveMemoryIDs(ids ...int) {
+	if m.removedmemories == nil {
+		m.removedmemories = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.memories, ids[i])
+		m.removedmemories[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedMemories returns the removed IDs of the "memories" edge to the Memory entity.
+func (m *ConnectionMutation) RemovedMemoriesIDs() (ids []int) {
+	for id := range m.removedmemories {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// MemoriesIDs returns the "memories" edge IDs in the mutation.
+func (m *ConnectionMutation) MemoriesIDs() (ids []int) {
+	for id := range m.memories {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetMemories resets all changes to the "memories" edge.
+func (m *ConnectionMutation) ResetMemories() {
+	m.memories = nil
+	m.clearedmemories = false
+	m.removedmemories = nil
+}
+
+// Where appends a list predicates to the ConnectionMutation builder.
+func (m *ConnectionMutation) Where(ps ...predicate.Connection) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ConnectionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ConnectionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Connection, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ConnectionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ConnectionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Connection).
+func (m *ConnectionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ConnectionMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.name != nil {
+		fields = append(fields, connection.FieldName)
+	}
+	if m.parentUserId != nil {
+		fields = append(fields, connection.FieldParentUserId)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ConnectionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case connection.FieldName:
+		return m.Name()
+	case connection.FieldParentUserId:
+		return m.ParentUserId()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ConnectionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case connection.FieldName:
+		return m.OldName(ctx)
+	case connection.FieldParentUserId:
+		return m.OldParentUserId(ctx)
+	}
+	return nil, fmt.Errorf("unknown Connection field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ConnectionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case connection.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case connection.FieldParentUserId:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetParentUserId(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Connection field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ConnectionMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ConnectionMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ConnectionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Connection numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ConnectionMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ConnectionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ConnectionMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Connection nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ConnectionMutation) ResetField(name string) error {
+	switch name {
+	case connection.FieldName:
+		m.ResetName()
+		return nil
+	case connection.FieldParentUserId:
+		m.ResetParentUserId()
+		return nil
+	}
+	return fmt.Errorf("unknown Connection field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ConnectionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.memories != nil {
+		edges = append(edges, connection.EdgeMemories)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ConnectionMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case connection.EdgeMemories:
+		ids := make([]ent.Value, 0, len(m.memories))
+		for id := range m.memories {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ConnectionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedmemories != nil {
+		edges = append(edges, connection.EdgeMemories)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ConnectionMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case connection.EdgeMemories:
+		ids := make([]ent.Value, 0, len(m.removedmemories))
+		for id := range m.removedmemories {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ConnectionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedmemories {
+		edges = append(edges, connection.EdgeMemories)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ConnectionMutation) EdgeCleared(name string) bool {
+	switch name {
+	case connection.EdgeMemories:
+		return m.clearedmemories
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ConnectionMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Connection unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ConnectionMutation) ResetEdge(name string) error {
+	switch name {
+	case connection.EdgeMemories:
+		m.ResetMemories()
+		return nil
+	}
+	return fmt.Errorf("unknown Connection edge %s", name)
+}
 
 // MemoryMutation represents an operation that mutates the Memory nodes in the graph.
 type MemoryMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	content       *string
-	clearedFields map[string]struct{}
-	person        *int
-	clearedperson bool
-	done          bool
-	oldValue      func(context.Context) (*Memory, error)
-	predicates    []predicate.Memory
+	op                Op
+	typ               string
+	id                *int
+	content           *string
+	clearedFields     map[string]struct{}
+	connection        *int
+	clearedconnection bool
+	done              bool
+	oldValue          func(context.Context) (*Memory, error)
+	predicates        []predicate.Memory
 }
 
 var _ ent.Mutation = (*MemoryMutation)(nil)
@@ -177,43 +650,43 @@ func (m *MemoryMutation) ResetContent() {
 	m.content = nil
 }
 
-// SetPersonID sets the "person" edge to the Person entity by id.
-func (m *MemoryMutation) SetPersonID(id int) {
-	m.person = &id
+// SetConnectionID sets the "connection" edge to the Connection entity by id.
+func (m *MemoryMutation) SetConnectionID(id int) {
+	m.connection = &id
 }
 
-// ClearPerson clears the "person" edge to the Person entity.
-func (m *MemoryMutation) ClearPerson() {
-	m.clearedperson = true
+// ClearConnection clears the "connection" edge to the Connection entity.
+func (m *MemoryMutation) ClearConnection() {
+	m.clearedconnection = true
 }
 
-// PersonCleared reports if the "person" edge to the Person entity was cleared.
-func (m *MemoryMutation) PersonCleared() bool {
-	return m.clearedperson
+// ConnectionCleared reports if the "connection" edge to the Connection entity was cleared.
+func (m *MemoryMutation) ConnectionCleared() bool {
+	return m.clearedconnection
 }
 
-// PersonID returns the "person" edge ID in the mutation.
-func (m *MemoryMutation) PersonID() (id int, exists bool) {
-	if m.person != nil {
-		return *m.person, true
+// ConnectionID returns the "connection" edge ID in the mutation.
+func (m *MemoryMutation) ConnectionID() (id int, exists bool) {
+	if m.connection != nil {
+		return *m.connection, true
 	}
 	return
 }
 
-// PersonIDs returns the "person" edge IDs in the mutation.
+// ConnectionIDs returns the "connection" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// PersonID instead. It exists only for internal usage by the builders.
-func (m *MemoryMutation) PersonIDs() (ids []int) {
-	if id := m.person; id != nil {
+// ConnectionID instead. It exists only for internal usage by the builders.
+func (m *MemoryMutation) ConnectionIDs() (ids []int) {
+	if id := m.connection; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetPerson resets all changes to the "person" edge.
-func (m *MemoryMutation) ResetPerson() {
-	m.person = nil
-	m.clearedperson = false
+// ResetConnection resets all changes to the "connection" edge.
+func (m *MemoryMutation) ResetConnection() {
+	m.connection = nil
+	m.clearedconnection = false
 }
 
 // Where appends a list predicates to the MemoryMutation builder.
@@ -350,8 +823,8 @@ func (m *MemoryMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *MemoryMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.person != nil {
-		edges = append(edges, memory.EdgePerson)
+	if m.connection != nil {
+		edges = append(edges, memory.EdgeConnection)
 	}
 	return edges
 }
@@ -360,8 +833,8 @@ func (m *MemoryMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *MemoryMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case memory.EdgePerson:
-		if id := m.person; id != nil {
+	case memory.EdgeConnection:
+		if id := m.connection; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -383,8 +856,8 @@ func (m *MemoryMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *MemoryMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedperson {
-		edges = append(edges, memory.EdgePerson)
+	if m.clearedconnection {
+		edges = append(edges, memory.EdgeConnection)
 	}
 	return edges
 }
@@ -393,8 +866,8 @@ func (m *MemoryMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *MemoryMutation) EdgeCleared(name string) bool {
 	switch name {
-	case memory.EdgePerson:
-		return m.clearedperson
+	case memory.EdgeConnection:
+		return m.clearedconnection
 	}
 	return false
 }
@@ -403,8 +876,8 @@ func (m *MemoryMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *MemoryMutation) ClearEdge(name string) error {
 	switch name {
-	case memory.EdgePerson:
-		m.ClearPerson()
+	case memory.EdgeConnection:
+		m.ClearConnection()
 		return nil
 	}
 	return fmt.Errorf("unknown Memory unique edge %s", name)
@@ -414,428 +887,9 @@ func (m *MemoryMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *MemoryMutation) ResetEdge(name string) error {
 	switch name {
-	case memory.EdgePerson:
-		m.ResetPerson()
+	case memory.EdgeConnection:
+		m.ResetConnection()
 		return nil
 	}
 	return fmt.Errorf("unknown Memory edge %s", name)
-}
-
-// PersonMutation represents an operation that mutates the Person nodes in the graph.
-type PersonMutation struct {
-	config
-	op              Op
-	typ             string
-	id              *int
-	name            *string
-	clearedFields   map[string]struct{}
-	memories        map[int]struct{}
-	removedmemories map[int]struct{}
-	clearedmemories bool
-	done            bool
-	oldValue        func(context.Context) (*Person, error)
-	predicates      []predicate.Person
-}
-
-var _ ent.Mutation = (*PersonMutation)(nil)
-
-// personOption allows management of the mutation configuration using functional options.
-type personOption func(*PersonMutation)
-
-// newPersonMutation creates new mutation for the Person entity.
-func newPersonMutation(c config, op Op, opts ...personOption) *PersonMutation {
-	m := &PersonMutation{
-		config:        c,
-		op:            op,
-		typ:           TypePerson,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withPersonID sets the ID field of the mutation.
-func withPersonID(id int) personOption {
-	return func(m *PersonMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *Person
-		)
-		m.oldValue = func(ctx context.Context) (*Person, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().Person.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withPerson sets the old Person of the mutation.
-func withPerson(node *Person) personOption {
-	return func(m *PersonMutation) {
-		m.oldValue = func(context.Context) (*Person, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m PersonMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m PersonMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *PersonMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *PersonMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().Person.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetName sets the "name" field.
-func (m *PersonMutation) SetName(s string) {
-	m.name = &s
-}
-
-// Name returns the value of the "name" field in the mutation.
-func (m *PersonMutation) Name() (r string, exists bool) {
-	v := m.name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldName returns the old "name" field's value of the Person entity.
-// If the Person object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PersonMutation) OldName(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
-	}
-	return oldValue.Name, nil
-}
-
-// ResetName resets all changes to the "name" field.
-func (m *PersonMutation) ResetName() {
-	m.name = nil
-}
-
-// AddMemoryIDs adds the "memories" edge to the Memory entity by ids.
-func (m *PersonMutation) AddMemoryIDs(ids ...int) {
-	if m.memories == nil {
-		m.memories = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.memories[ids[i]] = struct{}{}
-	}
-}
-
-// ClearMemories clears the "memories" edge to the Memory entity.
-func (m *PersonMutation) ClearMemories() {
-	m.clearedmemories = true
-}
-
-// MemoriesCleared reports if the "memories" edge to the Memory entity was cleared.
-func (m *PersonMutation) MemoriesCleared() bool {
-	return m.clearedmemories
-}
-
-// RemoveMemoryIDs removes the "memories" edge to the Memory entity by IDs.
-func (m *PersonMutation) RemoveMemoryIDs(ids ...int) {
-	if m.removedmemories == nil {
-		m.removedmemories = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.memories, ids[i])
-		m.removedmemories[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedMemories returns the removed IDs of the "memories" edge to the Memory entity.
-func (m *PersonMutation) RemovedMemoriesIDs() (ids []int) {
-	for id := range m.removedmemories {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// MemoriesIDs returns the "memories" edge IDs in the mutation.
-func (m *PersonMutation) MemoriesIDs() (ids []int) {
-	for id := range m.memories {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetMemories resets all changes to the "memories" edge.
-func (m *PersonMutation) ResetMemories() {
-	m.memories = nil
-	m.clearedmemories = false
-	m.removedmemories = nil
-}
-
-// Where appends a list predicates to the PersonMutation builder.
-func (m *PersonMutation) Where(ps ...predicate.Person) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the PersonMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *PersonMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.Person, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *PersonMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *PersonMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (Person).
-func (m *PersonMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *PersonMutation) Fields() []string {
-	fields := make([]string, 0, 1)
-	if m.name != nil {
-		fields = append(fields, person.FieldName)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *PersonMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case person.FieldName:
-		return m.Name()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *PersonMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case person.FieldName:
-		return m.OldName(ctx)
-	}
-	return nil, fmt.Errorf("unknown Person field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *PersonMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case person.FieldName:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetName(v)
-		return nil
-	}
-	return fmt.Errorf("unknown Person field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *PersonMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *PersonMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *PersonMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown Person numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *PersonMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *PersonMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *PersonMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown Person nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *PersonMutation) ResetField(name string) error {
-	switch name {
-	case person.FieldName:
-		m.ResetName()
-		return nil
-	}
-	return fmt.Errorf("unknown Person field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *PersonMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.memories != nil {
-		edges = append(edges, person.EdgeMemories)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *PersonMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case person.EdgeMemories:
-		ids := make([]ent.Value, 0, len(m.memories))
-		for id := range m.memories {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *PersonMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.removedmemories != nil {
-		edges = append(edges, person.EdgeMemories)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *PersonMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case person.EdgeMemories:
-		ids := make([]ent.Value, 0, len(m.removedmemories))
-		for id := range m.removedmemories {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *PersonMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedmemories {
-		edges = append(edges, person.EdgeMemories)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *PersonMutation) EdgeCleared(name string) bool {
-	switch name {
-	case person.EdgeMemories:
-		return m.clearedmemories
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *PersonMutation) ClearEdge(name string) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown Person unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *PersonMutation) ResetEdge(name string) error {
-	switch name {
-	case person.EdgeMemories:
-		m.ResetMemories()
-		return nil
-	}
-	return fmt.Errorf("unknown Person edge %s", name)
 }

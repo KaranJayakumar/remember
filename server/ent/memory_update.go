@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/KaranJayakumar/remember/ent/connection"
 	"github.com/KaranJayakumar/remember/ent/memory"
-	"github.com/KaranJayakumar/remember/ent/person"
 	"github.com/KaranJayakumar/remember/ent/predicate"
 )
 
@@ -42,15 +42,15 @@ func (mu *MemoryUpdate) SetNillableContent(s *string) *MemoryUpdate {
 	return mu
 }
 
-// SetPersonID sets the "person" edge to the Person entity by ID.
-func (mu *MemoryUpdate) SetPersonID(id int) *MemoryUpdate {
-	mu.mutation.SetPersonID(id)
+// SetConnectionID sets the "connection" edge to the Connection entity by ID.
+func (mu *MemoryUpdate) SetConnectionID(id int) *MemoryUpdate {
+	mu.mutation.SetConnectionID(id)
 	return mu
 }
 
-// SetPerson sets the "person" edge to the Person entity.
-func (mu *MemoryUpdate) SetPerson(p *Person) *MemoryUpdate {
-	return mu.SetPersonID(p.ID)
+// SetConnection sets the "connection" edge to the Connection entity.
+func (mu *MemoryUpdate) SetConnection(c *Connection) *MemoryUpdate {
+	return mu.SetConnectionID(c.ID)
 }
 
 // Mutation returns the MemoryMutation object of the builder.
@@ -58,9 +58,9 @@ func (mu *MemoryUpdate) Mutation() *MemoryMutation {
 	return mu.mutation
 }
 
-// ClearPerson clears the "person" edge to the Person entity.
-func (mu *MemoryUpdate) ClearPerson() *MemoryUpdate {
-	mu.mutation.ClearPerson()
+// ClearConnection clears the "connection" edge to the Connection entity.
+func (mu *MemoryUpdate) ClearConnection() *MemoryUpdate {
+	mu.mutation.ClearConnection()
 	return mu
 }
 
@@ -93,8 +93,8 @@ func (mu *MemoryUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (mu *MemoryUpdate) check() error {
-	if mu.mutation.PersonCleared() && len(mu.mutation.PersonIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Memory.person"`)
+	if mu.mutation.ConnectionCleared() && len(mu.mutation.ConnectionIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Memory.connection"`)
 	}
 	return nil
 }
@@ -114,28 +114,28 @@ func (mu *MemoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := mu.mutation.Content(); ok {
 		_spec.SetField(memory.FieldContent, field.TypeString, value)
 	}
-	if mu.mutation.PersonCleared() {
+	if mu.mutation.ConnectionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   memory.PersonTable,
-			Columns: []string{memory.PersonColumn},
+			Table:   memory.ConnectionTable,
+			Columns: []string{memory.ConnectionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(person.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(connection.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := mu.mutation.PersonIDs(); len(nodes) > 0 {
+	if nodes := mu.mutation.ConnectionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   memory.PersonTable,
-			Columns: []string{memory.PersonColumn},
+			Table:   memory.ConnectionTable,
+			Columns: []string{memory.ConnectionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(person.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(connection.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -177,15 +177,15 @@ func (muo *MemoryUpdateOne) SetNillableContent(s *string) *MemoryUpdateOne {
 	return muo
 }
 
-// SetPersonID sets the "person" edge to the Person entity by ID.
-func (muo *MemoryUpdateOne) SetPersonID(id int) *MemoryUpdateOne {
-	muo.mutation.SetPersonID(id)
+// SetConnectionID sets the "connection" edge to the Connection entity by ID.
+func (muo *MemoryUpdateOne) SetConnectionID(id int) *MemoryUpdateOne {
+	muo.mutation.SetConnectionID(id)
 	return muo
 }
 
-// SetPerson sets the "person" edge to the Person entity.
-func (muo *MemoryUpdateOne) SetPerson(p *Person) *MemoryUpdateOne {
-	return muo.SetPersonID(p.ID)
+// SetConnection sets the "connection" edge to the Connection entity.
+func (muo *MemoryUpdateOne) SetConnection(c *Connection) *MemoryUpdateOne {
+	return muo.SetConnectionID(c.ID)
 }
 
 // Mutation returns the MemoryMutation object of the builder.
@@ -193,9 +193,9 @@ func (muo *MemoryUpdateOne) Mutation() *MemoryMutation {
 	return muo.mutation
 }
 
-// ClearPerson clears the "person" edge to the Person entity.
-func (muo *MemoryUpdateOne) ClearPerson() *MemoryUpdateOne {
-	muo.mutation.ClearPerson()
+// ClearConnection clears the "connection" edge to the Connection entity.
+func (muo *MemoryUpdateOne) ClearConnection() *MemoryUpdateOne {
+	muo.mutation.ClearConnection()
 	return muo
 }
 
@@ -241,8 +241,8 @@ func (muo *MemoryUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (muo *MemoryUpdateOne) check() error {
-	if muo.mutation.PersonCleared() && len(muo.mutation.PersonIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Memory.person"`)
+	if muo.mutation.ConnectionCleared() && len(muo.mutation.ConnectionIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Memory.connection"`)
 	}
 	return nil
 }
@@ -279,28 +279,28 @@ func (muo *MemoryUpdateOne) sqlSave(ctx context.Context) (_node *Memory, err err
 	if value, ok := muo.mutation.Content(); ok {
 		_spec.SetField(memory.FieldContent, field.TypeString, value)
 	}
-	if muo.mutation.PersonCleared() {
+	if muo.mutation.ConnectionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   memory.PersonTable,
-			Columns: []string{memory.PersonColumn},
+			Table:   memory.ConnectionTable,
+			Columns: []string{memory.ConnectionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(person.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(connection.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := muo.mutation.PersonIDs(); len(nodes) > 0 {
+	if nodes := muo.mutation.ConnectionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   memory.PersonTable,
-			Columns: []string{memory.PersonColumn},
+			Table:   memory.ConnectionTable,
+			Columns: []string{memory.ConnectionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(person.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(connection.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

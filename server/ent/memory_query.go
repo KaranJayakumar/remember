@@ -11,20 +11,20 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/KaranJayakumar/remember/ent/connection"
 	"github.com/KaranJayakumar/remember/ent/memory"
-	"github.com/KaranJayakumar/remember/ent/person"
 	"github.com/KaranJayakumar/remember/ent/predicate"
 )
 
 // MemoryQuery is the builder for querying Memory entities.
 type MemoryQuery struct {
 	config
-	ctx        *QueryContext
-	order      []memory.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Memory
-	withPerson *PersonQuery
-	withFKs    bool
+	ctx            *QueryContext
+	order          []memory.OrderOption
+	inters         []Interceptor
+	predicates     []predicate.Memory
+	withConnection *ConnectionQuery
+	withFKs        bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -61,9 +61,9 @@ func (mq *MemoryQuery) Order(o ...memory.OrderOption) *MemoryQuery {
 	return mq
 }
 
-// QueryPerson chains the current query on the "person" edge.
-func (mq *MemoryQuery) QueryPerson() *PersonQuery {
-	query := (&PersonClient{config: mq.config}).Query()
+// QueryConnection chains the current query on the "connection" edge.
+func (mq *MemoryQuery) QueryConnection() *ConnectionQuery {
+	query := (&ConnectionClient{config: mq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := mq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -74,8 +74,8 @@ func (mq *MemoryQuery) QueryPerson() *PersonQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(memory.Table, memory.FieldID, selector),
-			sqlgraph.To(person.Table, person.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, memory.PersonTable, memory.PersonColumn),
+			sqlgraph.To(connection.Table, connection.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, memory.ConnectionTable, memory.ConnectionColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
 		return fromU, nil
@@ -270,26 +270,26 @@ func (mq *MemoryQuery) Clone() *MemoryQuery {
 		return nil
 	}
 	return &MemoryQuery{
-		config:     mq.config,
-		ctx:        mq.ctx.Clone(),
-		order:      append([]memory.OrderOption{}, mq.order...),
-		inters:     append([]Interceptor{}, mq.inters...),
-		predicates: append([]predicate.Memory{}, mq.predicates...),
-		withPerson: mq.withPerson.Clone(),
+		config:         mq.config,
+		ctx:            mq.ctx.Clone(),
+		order:          append([]memory.OrderOption{}, mq.order...),
+		inters:         append([]Interceptor{}, mq.inters...),
+		predicates:     append([]predicate.Memory{}, mq.predicates...),
+		withConnection: mq.withConnection.Clone(),
 		// clone intermediate query.
 		sql:  mq.sql.Clone(),
 		path: mq.path,
 	}
 }
 
-// WithPerson tells the query-builder to eager-load the nodes that are connected to
-// the "person" edge. The optional arguments are used to configure the query builder of the edge.
-func (mq *MemoryQuery) WithPerson(opts ...func(*PersonQuery)) *MemoryQuery {
-	query := (&PersonClient{config: mq.config}).Query()
+// WithConnection tells the query-builder to eager-load the nodes that are connected to
+// the "connection" edge. The optional arguments are used to configure the query builder of the edge.
+func (mq *MemoryQuery) WithConnection(opts ...func(*ConnectionQuery)) *MemoryQuery {
+	query := (&ConnectionClient{config: mq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	mq.withPerson = query
+	mq.withConnection = query
 	return mq
 }
 
@@ -373,10 +373,10 @@ func (mq *MemoryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Memor
 		withFKs     = mq.withFKs
 		_spec       = mq.querySpec()
 		loadedTypes = [1]bool{
-			mq.withPerson != nil,
+			mq.withConnection != nil,
 		}
 	)
-	if mq.withPerson != nil {
+	if mq.withConnection != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -400,23 +400,23 @@ func (mq *MemoryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Memor
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := mq.withPerson; query != nil {
-		if err := mq.loadPerson(ctx, query, nodes, nil,
-			func(n *Memory, e *Person) { n.Edges.Person = e }); err != nil {
+	if query := mq.withConnection; query != nil {
+		if err := mq.loadConnection(ctx, query, nodes, nil,
+			func(n *Memory, e *Connection) { n.Edges.Connection = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (mq *MemoryQuery) loadPerson(ctx context.Context, query *PersonQuery, nodes []*Memory, init func(*Memory), assign func(*Memory, *Person)) error {
+func (mq *MemoryQuery) loadConnection(ctx context.Context, query *ConnectionQuery, nodes []*Memory, init func(*Memory), assign func(*Memory, *Connection)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Memory)
 	for i := range nodes {
-		if nodes[i].person_memories == nil {
+		if nodes[i].connection_memories == nil {
 			continue
 		}
-		fk := *nodes[i].person_memories
+		fk := *nodes[i].connection_memories
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -425,7 +425,7 @@ func (mq *MemoryQuery) loadPerson(ctx context.Context, query *PersonQuery, nodes
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(person.IDIn(ids...))
+	query.Where(connection.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -433,7 +433,7 @@ func (mq *MemoryQuery) loadPerson(ctx context.Context, query *PersonQuery, nodes
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "person_memories" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "connection_memories" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

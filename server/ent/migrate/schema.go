@@ -9,11 +9,23 @@ import (
 )
 
 var (
+	// ConnectionsColumns holds the columns for the "Connections" table.
+	ConnectionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "parent_user_id", Type: field.TypeString},
+	}
+	// ConnectionsTable holds the schema information for the "Connections" table.
+	ConnectionsTable = &schema.Table{
+		Name:       "Connections",
+		Columns:    ConnectionsColumns,
+		PrimaryKey: []*schema.Column{ConnectionsColumns[0]},
+	}
 	// MemoriesColumns holds the columns for the "Memories" table.
 	MemoriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "content", Type: field.TypeString, Size: 2147483647},
-		{Name: "person_memories", Type: field.TypeInt},
+		{Name: "connection_memories", Type: field.TypeInt},
 	}
 	// MemoriesTable holds the schema information for the "Memories" table.
 	MemoriesTable = &schema.Table{
@@ -22,37 +34,26 @@ var (
 		PrimaryKey: []*schema.Column{MemoriesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "Memories_People_memories",
+				Symbol:     "Memories_Connections_memories",
 				Columns:    []*schema.Column{MemoriesColumns[2]},
-				RefColumns: []*schema.Column{PeopleColumns[0]},
+				RefColumns: []*schema.Column{ConnectionsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 	}
-	// PeopleColumns holds the columns for the "People" table.
-	PeopleColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString},
-	}
-	// PeopleTable holds the schema information for the "People" table.
-	PeopleTable = &schema.Table{
-		Name:       "People",
-		Columns:    PeopleColumns,
-		PrimaryKey: []*schema.Column{PeopleColumns[0]},
-	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		ConnectionsTable,
 		MemoriesTable,
-		PeopleTable,
 	}
 )
 
 func init() {
-	MemoriesTable.ForeignKeys[0].RefTable = PeopleTable
+	ConnectionsTable.Annotation = &entsql.Annotation{
+		Table: "Connections",
+	}
+	MemoriesTable.ForeignKeys[0].RefTable = ConnectionsTable
 	MemoriesTable.Annotation = &entsql.Annotation{
 		Table: "Memories",
-	}
-	PeopleTable.Annotation = &entsql.Annotation{
-		Table: "People",
 	}
 }

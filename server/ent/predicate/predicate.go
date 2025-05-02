@@ -6,8 +6,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Connection is the predicate function for connection builders.
+type Connection func(*sql.Selector)
+
 // Memory is the predicate function for memory builders.
 type Memory func(*sql.Selector)
-
-// Person is the predicate function for person builders.
-type Person func(*sql.Selector)
