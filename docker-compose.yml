@@ -8,6 +8,8 @@ services:
     depends_on:
       app_database:
         condition: service_healthy
+    ports:
+      - "8080:8080"
   app_database:
     image: postgres:latest
     ports:
