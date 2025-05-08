@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -37,6 +38,9 @@ func getConnections(client *ent.Client) gin.HandlerFunc {
 		if err := c.BindJSON(&input); err != nil {
 			return
 		}
+		fmt.Print("Reached get connection")
+		fmt.Print("Reached get connection")
+		fmt.Print("Reached get connection")
 
 		var id = "abcd"
 		connections, err := client.Connection.
