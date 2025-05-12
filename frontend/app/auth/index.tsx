@@ -1,6 +1,6 @@
 import { Text, View, TextInput, Alert } from "react-native"
 import { useForm, Controller } from "react-hook-form"
-import Button from "../../components/core/Button"
+import Button from "../../components/ui/Button"
 
 export default function SignIn() {
   const {
@@ -50,7 +50,6 @@ export default function SignIn() {
         )}
         name="password"
       />
-
       <Button title="Submit" onPress={handleSubmit(onSubmit)} />
     </View>
   )
