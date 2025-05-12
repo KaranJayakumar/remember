@@ -20,12 +20,16 @@
     "expo-router": "~5.0.6",
     "expo-secure-store": "~14.2.3",
     "expo-splash-screen": "~0.30.8",
+    "nativewind": "^4.1.23",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "react-hook-form": "^7.56.3",
     "react-native": "0.79.2",
-    "react-native-safe-area-context": "5.4.0",
+    "react-native-reanimated": "^3.16.2",
+    "react-native-safe-area-context": "^5.4.0",
     "react-native-screens": "~4.10.0",
-    "react-native-web": "~0.20.0"
+    "react-native-web": "~0.20.0",
+    "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -34,4 +38,3 @@
   },
   "private": true
 }
-
