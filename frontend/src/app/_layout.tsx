@@ -12,8 +12,6 @@ SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient()
 
 export default function RootLayout() {
-  console.log("Reached root layout")
-  SplashScreen.hideAsync();
 
   return (
     <ClerkProvider tokenCache={tokenCache}>

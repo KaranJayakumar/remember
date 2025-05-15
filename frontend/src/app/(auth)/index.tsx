@@ -22,12 +22,17 @@ export default function Page() {
 
   const onPress = useCallback(async () => {
     try {
+      console.log("Pressed sign in")
       const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
         strategy: 'oauth_google',
         redirectUrl: AuthSession.makeRedirectUri(),
       })
+      console.log("Reached post")
 
       if (createdSessionId) {
+
+        console.log("Created session")
+
         setActive!({ session: createdSessionId })
       } else {
       }
