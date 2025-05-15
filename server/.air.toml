@@ -1,0 +1,9 @@
+root = "."
+testdata_dir = "testdata"
+tmp_dir = "tmp"
+
+[build]
+  args_bin = []
+  bin = "./bin/app"
+  cmd = "go build -o ./bin/app ./cmd"
+  delay = 1000

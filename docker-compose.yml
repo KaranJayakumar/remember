@@ -5,15 +5,19 @@ name: remember
 services:
   server:
     build: ./server
+    volumes:
+      - ./server:/app      
+    env_file:
+      - ./server/.env
     depends_on:
       app_database:
         condition: service_healthy
     ports:
-      - "8080:8080"
+      - "8888:8080"
   app_database:
     image: postgres:latest
     ports:
-      - "5432:5432"
+      - "5555:5432"
     environment:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: remember
@@ -23,4 +27,3 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
