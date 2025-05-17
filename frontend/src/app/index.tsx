@@ -1,14 +1,19 @@
 import { useAuth } from '@clerk/clerk-expo'
 import { useRouter } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function Page() {
   const { isSignedIn, isLoaded } = useAuth()
+  const [isMounted, setIsMounted] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
-    if (!isLoaded) return
+    setIsMounted(true)
+  })
+
+  useEffect(() => {
+    if (!isLoaded || !isMounted) return
 
     SplashScreen.hideAsync()
 
