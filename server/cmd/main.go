@@ -5,14 +5,12 @@ import (
 	"fmt"
 	"github.com/KaranJayakumar/remember/ent"
 	"github.com/KaranJayakumar/remember/ent/connection"
-	"github.com/clerk/clerk-sdk-go/v2/jwt"
-	"github.com/clerk/clerk-sdk-go/v2/user"
+	clerkhttp "github.com/clerk/clerk-sdk-go/v2/http"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 	"os"
-	"strings"
 )
 
 func main() {
@@ -30,7 +28,7 @@ func main() {
 
 	authorized := router.Group("/")
 
-	authorized.Use(ClerkAuthMiddleware())
+	authorized.Use(ClerkMiddleware())
 	{
 		authorized.GET("/connection", getConnections(client))
 		authorized.POST("/connection", createConnection(client))
@@ -38,31 +36,14 @@ func main() {
 	}
 	router.Run()
 }
-
-func ClerkAuthMiddleware() gin.HandlerFunc {
+func ClerkMiddleware() gin.HandlerFunc {
+	middleware := clerkhttp.WithHeaderAuthorization()
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing or invalid Authorization header"})
-			return
-		}
-		token := strings.TrimPrefix(authHeader, "Bearer ")
-
-		claims, err := jwt.Verify(c.Request.Context(), &jwt.VerifyParams{
-			Token: token,
-		})
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-			return
-		}
-		usr, err := user.Get(c.Request.Context(), claims.Subject)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
-			return
-		}
-		fmt.Println("Successful authentication. Proceeding to request")
-		c.Set("user", usr)
-		c.Next()
+		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			c.Request = r
+			c.Next()
+		}))
+		handler.ServeHTTP(c.Writer, c.Request)
 	}
 }
 
