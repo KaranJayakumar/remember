@@ -3,16 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
-	"os"
-
 	"github.com/KaranJayakumar/remember/ent"
 	"github.com/KaranJayakumar/remember/ent/connection"
-	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq"
-	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/clerk/clerk-sdk-go/v2/jwt"
 	"github.com/clerk/clerk-sdk-go/v2/user"
+	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
+	"log"
+	"net/http"
+	"os"
+	"strings"
 )
 
 func main() {
@@ -27,22 +27,17 @@ func main() {
 		log.Fatalf("failed printing schema changes: %v", err)
 	}
 	router := gin.Default()
-	authGroup := router.Group("/", ClerkAuthMiddleware())
-	router.GET("/connection", getConnections(client))
-	router.POST("/connection", createConnection(client))
-	router.DELETE("/connection", deleteConnection(client))
+
+	authorized := router.Group("/")
+
+	authorized.Use(ClerkAuthMiddleware())
+	{
+		authorized.GET("/connection", getConnections(client))
+		authorized.POST("/connection", createConnection(client))
+		authorized.DELETE("/connection", deleteConnection(client))
+	}
 	router.Run()
 }
-package main
-
-import (
-	"net/http"
-	"strings"
-
-	"github.com/clerk/clerk-sdk-go/v2/jwt"
-	"github.com/clerk/clerk-sdk-go/v2/user"
-	"github.com/gin-gonic/gin"
-)
 
 func ClerkAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -52,6 +47,7 @@ func ClerkAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 		token := strings.TrimPrefix(authHeader, "Bearer ")
+
 		claims, err := jwt.Verify(c.Request.Context(), &jwt.VerifyParams{
 			Token: token,
 		})
@@ -70,10 +66,9 @@ func ClerkAuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-
 func getConnections(client *ent.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		usrRaw, exists := c.Get("user")
+		id := "abcd"
 		connections, err := client.Connection.
 			Query().
 			Where(connection.ParentUserIdEQ(id)).
@@ -81,9 +76,11 @@ func getConnections(client *ent.Client) gin.HandlerFunc {
 
 		if err != nil {
 			fmt.Println("An error occured while fetching connections %s", err)
+
 		}
 
 		c.JSON(200, gin.H{"connections": connections})
+		return
 	}
 }
 
