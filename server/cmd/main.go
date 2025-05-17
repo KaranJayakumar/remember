@@ -10,6 +10,9 @@ import (
 	"github.com/KaranJayakumar/remember/ent/connection"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	"github.com/clerk/clerk-sdk-go/v2"
+	"github.com/clerk/clerk-sdk-go/v2/jwt"
+	"github.com/clerk/clerk-sdk-go/v2/user"
 )
 
 func main() {
@@ -24,34 +27,62 @@ func main() {
 		log.Fatalf("failed printing schema changes: %v", err)
 	}
 	router := gin.Default()
+	authGroup := router.Group("/", ClerkAuthMiddleware())
 	router.GET("/connection", getConnections(client))
 	router.POST("/connection", createConnection(client))
 	router.DELETE("/connection", deleteConnection(client))
 	router.Run()
 }
+package main
+
+import (
+	"net/http"
+	"strings"
+
+	"github.com/clerk/clerk-sdk-go/v2/jwt"
+	"github.com/clerk/clerk-sdk-go/v2/user"
+	"github.com/gin-gonic/gin"
+)
+
+func ClerkAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing or invalid Authorization header"})
+			return
+		}
+		token := strings.TrimPrefix(authHeader, "Bearer ")
+		claims, err := jwt.Verify(c.Request.Context(), &jwt.VerifyParams{
+			Token: token,
+		})
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			return
+		}
+		usr, err := user.Get(c.Request.Context(), claims.Subject)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+			return
+		}
+		fmt.Println("Successful authentication. Proceeding to request")
+		c.Set("user", usr)
+		c.Next()
+	}
+}
+
 
 func getConnections(client *ent.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var input struct {
-			Name string `json:"name"`
-		}
-		if err := c.BindJSON(&input); err != nil {
-			return
-		}
-		fmt.Print("Reached get connection")
-		fmt.Print("Reached get connection")
-		fmt.Print("Reached get connection")
-
-		var id = "abcd"
+		usrRaw, exists := c.Get("user")
 		connections, err := client.Connection.
 			Query().
 			Where(connection.ParentUserIdEQ(id)).
 			All(c.Request.Context())
+
 		if err != nil {
-			return
+			fmt.Println("An error occured while fetching connections %s", err)
 		}
 
-		_ = connections
 		c.JSON(200, gin.H{"connections": connections})
 	}
 }
