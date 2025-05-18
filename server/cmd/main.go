@@ -3,25 +3,31 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/KaranJayakumar/remember/ent"
-	"github.com/KaranJayakumar/remember/ent/connection"
-	clerkhttp "github.com/clerk/clerk-sdk-go/v2/http"
-	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/KaranJayakumar/remember/ent"
+	"github.com/KaranJayakumar/remember/ent/connection"
+	"github.com/KaranJayakumar/remember/ent/migrate"
+	"github.com/clerk/clerk-sdk-go/v2"
+	clerkhttp "github.com/clerk/clerk-sdk-go/v2/http"
+	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
 )
 
 func main() {
-	client, err := ent.Open("postgres", "host=app_database port=5432 user=user dbname=remember password=password sslmode=disable")
+	client, err := ent.Open("postgres", os.Getenv("POSTGRES_ENT_CONN_STRING"))
 
 	if err != nil {
 		log.Fatalf("failed connecting to postgres: %v", err)
+
 	}
+
 	defer client.Close()
 	ctx := context.Background()
-	if err := client.Schema.WriteTo(ctx, os.Stdout); err != nil {
+	if err := client.Schema.Create(ctx, migrate.WithDropIndex(true), migrate.WithDropColumn(true)); err != nil {
+
 		log.Fatalf("failed printing schema changes: %v", err)
 	}
 	router := gin.Default()
@@ -31,13 +37,14 @@ func main() {
 	authorized.Use(ClerkMiddleware())
 	{
 		authorized.GET("/connection", getConnections(client))
+
 		authorized.POST("/connection", createConnection(client))
 		authorized.DELETE("/connection", deleteConnection(client))
 	}
 	router.Run()
 }
 func ClerkMiddleware() gin.HandlerFunc {
-	middleware := clerkhttp.WithHeaderAuthorization()
+	middleware := clerkhttp.RequireHeaderAuthorization()
 	return func(c *gin.Context) {
 		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			c.Request = r
@@ -49,14 +56,19 @@ func ClerkMiddleware() gin.HandlerFunc {
 
 func getConnections(client *ent.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id := "abcd"
+		claims, ok := clerk.SessionClaimsFromContext(c.Request.Context())
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+		userId := claims.Subject
 		connections, err := client.Connection.
 			Query().
-			Where(connection.ParentUserIdEQ(id)).
+			Where(connection.ParentUserIdEQ(userId)).
 			All(c.Request.Context())
 
 		if err != nil {
-			fmt.Println("An error occured while fetching connections %s", err)
+			fmt.Printf("An error occured while fetching connections %s", err)
 
 		}
 
