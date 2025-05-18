@@ -2,8 +2,6 @@ package schema
 
 import (
 	"entgo.io/ent"
-	"entgo.io/ent/dialect/entsql"
-	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
@@ -22,11 +20,5 @@ func (Connection) Fields() []ent.Field {
 func (Connection) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("memories", Memory.Type),
-	}
-}
-
-func (Connection) Annotations() []schema.Annotation {
-	return []schema.Annotation{
-		entsql.Annotation{Table: "Connections"},
 	}
 }
