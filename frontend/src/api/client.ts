@@ -1,4 +1,4 @@
-import axios, { InternalAxiosRequestConfig } from 'axios';
+import axios, {AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
 const client = axios.create({
   baseURL: `${process.env.EXPO_PUBLIC_BASE_API_URL}`,
@@ -17,5 +17,21 @@ client.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   console.error("❌ REQUEST ERROR:", error);
   return Promise.reject(error);
 });
+
+client.interceptors.response.use(
+  (response: AxiosResponse) => {
+    console.log("📦 RESPONSE:");
+    const url = `${response.config.baseURL ?? ''}${response.config.url ?? ''}`;
+    console.log("URL:", url);
+    console.log("Status:", response.status);
+    console.log("Data:", response.data);
+    return response;
+  },
+  (error) => {
+    console.error("❌ RESPONSE ERROR:", error);
+    return Promise.reject(error);
+  }
+);
+
 
 export default client;
