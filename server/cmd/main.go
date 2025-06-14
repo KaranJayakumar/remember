@@ -11,12 +11,16 @@ import (
 	"github.com/KaranJayakumar/remember/ent/connection"
 	"github.com/KaranJayakumar/remember/ent/migrate"
 	"github.com/clerk/clerk-sdk-go/v2"
-	clerkhttp "github.com/clerk/clerk-sdk-go/v2/http"
+	"github.com/clerk/clerk-sdk-go/v2/jwt"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
 
 func main() {
+	setupServer()
+}
+
+func setupServer() {
 	client, err := ent.Open("postgres", os.Getenv("POSTGRES_ENT_CONN_STRING"))
 
 	if err != nil {
@@ -30,31 +34,17 @@ func main() {
 
 		log.Fatalf("failed printing schema changes: %v", err)
 	}
+	clerk.SetKey(os.Getenv("CLERK_SECRET_KEY"))
+
 	router := gin.Default()
 
-	authorized := router.Group("/")
+	router.GET("/connections", AuthMiddleware(), GetConnections(client))
 
-	authorized.Use(ClerkMiddleware())
-	{
-		authorized.GET("/connection", getConnections(client))
-
-		authorized.POST("/connection", createConnection(client))
-		authorized.DELETE("/connection", deleteConnection(client))
-	}
 	router.Run()
-}
-func ClerkMiddleware() gin.HandlerFunc {
-	middleware := clerkhttp.RequireHeaderAuthorization()
-	return func(c *gin.Context) {
-		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			c.Request = r
-			c.Next()
-		}))
-		handler.ServeHTTP(c.Writer, c.Request)
-	}
+
 }
 
-func getConnections(client *ent.Client) gin.HandlerFunc {
+func GetConnections(client *ent.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		claims, ok := clerk.SessionClaimsFromContext(c.Request.Context())
 		if !ok {
@@ -77,55 +67,33 @@ func getConnections(client *ent.Client) gin.HandlerFunc {
 	}
 }
 
-func createConnection(client *ent.Client) gin.HandlerFunc {
+func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var input struct {
-			Name string `json:"name"`
-		}
-		if err := c.BindJSON(&input); err != nil {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			fmt.Println("No Authorization header found")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 			return
 		}
 
-		var id = "abcd"
-		connection, err := client.Connection.
-			Create().
-			SetName(input.Name).
-			SetParentUserId(id).
-			Save(c.Request.Context())
+		sessionToken := authHeader
+		if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+			sessionToken = authHeader[7:]
+		}
+
+		claims, err := jwt.Verify(context.Background(), &jwt.VerifyParams{
+			Token: sessionToken,
+		})
 		if err != nil {
+			fmt.Printf("Token verification failed: %v\n", err)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 			return
 		}
 
-		_ = connection
-		c.JSON(200, gin.H{"connection": connection})
-	}
-}
+		ctx := clerk.ContextWithSessionClaims(c.Request.Context(), claims)
+		c.Request = c.Request.WithContext(ctx)
 
-func deleteConnection(client *ent.Client) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		var input struct {
-			Name string `json:"name"`
-		}
-		if err := c.BindJSON(&input); err != nil {
-			c.JSON(400, gin.H{"error": "Invalid input"})
-			return
-		}
-
-		var id = "abcd"
-
-		affected, err := client.Connection.
-			Delete().
-			Where(
-				connection.ParentUserIdEQ(id),
-				connection.NameEQ(input.Name),
-			).
-			Exec(c.Request.Context())
-
-		if err != nil {
-			c.JSON(500, gin.H{"error": "Failed to delete connections"})
-			return
-		}
-
-		c.JSON(200, gin.H{"deleted": affected})
+		c.Set("claims", claims)
+		c.Next()
 	}
 }
