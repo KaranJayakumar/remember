@@ -25,12 +25,13 @@ export const useConnections = () => {
     return data.connections;
   };
 
-  const { data: connections, isLoading, error } = useQuery({
+  const { data: connections, isLoading, error, refetch } = useQuery({
     queryKey: ['connections'],
     queryFn: getConnections,
   });
 
   return {
+    refetch,
     connections,
     isLoading,
     error,
