@@ -39,6 +39,7 @@ func setupServer() {
 	router := gin.Default()
 
 	router.GET("/connections", AuthMiddleware(), GetConnections(client))
+	router.POST("/connections", AuthMiddleware(), CreateConnection(client))
 
 	router.Run()
 
@@ -72,7 +73,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			fmt.Println("No Authorization header found")
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have a valid session token"})
 			return
 		}
 
@@ -95,5 +96,28 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		c.Set("claims", claims)
 		c.Next()
+	}
+}
+
+func CreateConnection(client *ent.Client) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		claims, ok := clerk.SessionClaimsFromContext(c.Request.Context())
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not have a valid session token"})
+			return
+		}
+		userId := claims.Subject
+		connections, err := client.Connection.
+			Query().
+			Where(connection.ParentUserIdEQ(userId)).
+			All(c.Request.Context())
+
+		if err != nil {
+			fmt.Printf("An error occured while fetching connections %s", err)
+
+		}
+
+		c.JSON(200, gin.H{"connections": connections})
+		return
 	}
 }
