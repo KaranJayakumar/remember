@@ -14,7 +14,7 @@ type Workspace struct {
 func (Workspace) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Default(uuid.New),
-		field.String("name").NotEmpty(),
+		field.String("name").NotEmpty().Default("Default Workspace"),
 	}
 }
 

@@ -14,9 +14,9 @@ type Connection struct {
 func (Connection) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Default(uuid.New),
-		field.UUID("workspace_id", uuid.UUID{}),
+		field.UUID("workspaceId", uuid.UUID{}),
 		field.String("name").NotEmpty(),
-		field.String("image_url").Optional(),
+		field.String("imageUrl").Optional(),
 	}
 }
 
@@ -24,7 +24,7 @@ func (Connection) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("workspace", Workspace.Type).
 			Ref("connections").
-			Field("workspace_id").
+			Field("workspaceId").
 			Unique().
 			Required(),
 
