@@ -52,6 +52,7 @@ func GetConnections(client *ent.Client) gin.HandlerFunc {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 			return
 		}
+
 		userId := claims.Subject
 		connections, err := client.Connection.
 			Query().

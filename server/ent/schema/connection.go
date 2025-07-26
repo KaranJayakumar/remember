@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 type Connection struct {
@@ -12,13 +13,23 @@ type Connection struct {
 
 func (Connection) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name"),
-		field.String("parentUserId"),
+		field.UUID("id", uuid.UUID{}).Default(uuid.New),
+		field.UUID("workspace_id", uuid.UUID{}),
+		field.String("name").NotEmpty(),
+		field.String("image_url").Optional(),
 	}
 }
 
 func (Connection) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("memories", Memory.Type),
+		edge.From("workspace", Workspace.Type).
+			Ref("connections").
+			Field("workspace_id").
+			Unique().
+			Required(),
+
+		edge.To("notes", Note.Type),
+
+		edge.To("tags", Tag.Type),
 	}
 }
