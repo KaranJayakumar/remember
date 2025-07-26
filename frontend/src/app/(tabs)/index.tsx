@@ -1,9 +1,11 @@
-import { View, Button, Text } from "react-native";
+import { View } from "react-native";
 import { useConnections } from "../../hooks/useConnections";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-expo";
 import { createConnectionApi } from "../../api/api";
 import { useState } from "react";
+import { Text } from "../../components/ui/text";
+import { Button } from "../../components/ui/button";
 
 export default function Homepage() {
   const { connections = [] } = useConnections();
@@ -23,19 +25,19 @@ export default function Homepage() {
       {connections.map((conn: any) => (
         <View key={conn.id} className="mb-4 p-4 bg-gray-100 rounded">
           <Text className="text-lg font-semibold">{conn.name}</Text>
-          <Text className="text-sm text-gray-600">User ID: {conn.parentUserId}</Text>
+          <Text className="text-sm text-gray-600">
+            User ID: {conn.parentUserId}
+          </Text>
         </View>
       ))}
 
       <Text className="mb-4">Hello there, welcome to remember</Text>
-
-      <View className="flex flex-col">
-        <Button
-          title="Create a connection"
-          onPress={() => createConnection.mutate()}
-        />
-      </View>
+      <Button
+        variant={"default"}
+        className="flex-row items-center justify-center"
+      >
+        <Text>Create a Connection</Text>
+      </Button>
     </View>
   );
 }
-
