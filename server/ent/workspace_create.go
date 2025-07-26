@@ -35,6 +35,12 @@ func (wc *WorkspaceCreate) SetNillableName(s *string) *WorkspaceCreate {
 	return wc
 }
 
+// SetOwnerUserID sets the "owner_user_id" field.
+func (wc *WorkspaceCreate) SetOwnerUserID(s string) *WorkspaceCreate {
+	wc.mutation.SetOwnerUserID(s)
+	return wc
+}
+
 // SetID sets the "id" field.
 func (wc *WorkspaceCreate) SetID(u uuid.UUID) *WorkspaceCreate {
 	wc.mutation.SetID(u)
@@ -119,6 +125,14 @@ func (wc *WorkspaceCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Workspace.name": %w`, err)}
 		}
 	}
+	if _, ok := wc.mutation.OwnerUserID(); !ok {
+		return &ValidationError{Name: "owner_user_id", err: errors.New(`ent: missing required field "Workspace.owner_user_id"`)}
+	}
+	if v, ok := wc.mutation.OwnerUserID(); ok {
+		if err := workspace.OwnerUserIDValidator(v); err != nil {
+			return &ValidationError{Name: "owner_user_id", err: fmt.Errorf(`ent: validator failed for field "Workspace.owner_user_id": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -157,6 +171,10 @@ func (wc *WorkspaceCreate) createSpec() (*Workspace, *sqlgraph.CreateSpec) {
 	if value, ok := wc.mutation.Name(); ok {
 		_spec.SetField(workspace.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := wc.mutation.OwnerUserID(); ok {
+		_spec.SetField(workspace.FieldOwnerUserID, field.TypeString, value)
+		_node.OwnerUserID = value
 	}
 	if nodes := wc.mutation.ConnectionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

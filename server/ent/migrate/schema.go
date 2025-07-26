@@ -74,6 +74,7 @@ var (
 	WorkspacesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "name", Type: field.TypeString, Default: "Default Workspace"},
+		{Name: "owner_user_id", Type: field.TypeString},
 	}
 	// WorkspacesTable holds the schema information for the "workspaces" table.
 	WorkspacesTable = &schema.Table{

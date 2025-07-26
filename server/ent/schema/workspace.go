@@ -15,6 +15,7 @@ func (Workspace) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Default(uuid.New),
 		field.String("name").NotEmpty().Default("Default Workspace"),
+		field.String("owner_user_id").NotEmpty(),
 	}
 }
 

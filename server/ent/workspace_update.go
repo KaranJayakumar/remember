@@ -43,6 +43,20 @@ func (wu *WorkspaceUpdate) SetNillableName(s *string) *WorkspaceUpdate {
 	return wu
 }
 
+// SetOwnerUserID sets the "owner_user_id" field.
+func (wu *WorkspaceUpdate) SetOwnerUserID(s string) *WorkspaceUpdate {
+	wu.mutation.SetOwnerUserID(s)
+	return wu
+}
+
+// SetNillableOwnerUserID sets the "owner_user_id" field if the given value is not nil.
+func (wu *WorkspaceUpdate) SetNillableOwnerUserID(s *string) *WorkspaceUpdate {
+	if s != nil {
+		wu.SetOwnerUserID(*s)
+	}
+	return wu
+}
+
 // AddConnectionIDs adds the "connections" edge to the Connection entity by IDs.
 func (wu *WorkspaceUpdate) AddConnectionIDs(ids ...uuid.UUID) *WorkspaceUpdate {
 	wu.mutation.AddConnectionIDs(ids...)
@@ -118,6 +132,11 @@ func (wu *WorkspaceUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Workspace.name": %w`, err)}
 		}
 	}
+	if v, ok := wu.mutation.OwnerUserID(); ok {
+		if err := workspace.OwnerUserIDValidator(v); err != nil {
+			return &ValidationError{Name: "owner_user_id", err: fmt.Errorf(`ent: validator failed for field "Workspace.owner_user_id": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -135,6 +154,9 @@ func (wu *WorkspaceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := wu.mutation.Name(); ok {
 		_spec.SetField(workspace.FieldName, field.TypeString, value)
+	}
+	if value, ok := wu.mutation.OwnerUserID(); ok {
+		_spec.SetField(workspace.FieldOwnerUserID, field.TypeString, value)
 	}
 	if wu.mutation.ConnectionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -211,6 +233,20 @@ func (wuo *WorkspaceUpdateOne) SetName(s string) *WorkspaceUpdateOne {
 func (wuo *WorkspaceUpdateOne) SetNillableName(s *string) *WorkspaceUpdateOne {
 	if s != nil {
 		wuo.SetName(*s)
+	}
+	return wuo
+}
+
+// SetOwnerUserID sets the "owner_user_id" field.
+func (wuo *WorkspaceUpdateOne) SetOwnerUserID(s string) *WorkspaceUpdateOne {
+	wuo.mutation.SetOwnerUserID(s)
+	return wuo
+}
+
+// SetNillableOwnerUserID sets the "owner_user_id" field if the given value is not nil.
+func (wuo *WorkspaceUpdateOne) SetNillableOwnerUserID(s *string) *WorkspaceUpdateOne {
+	if s != nil {
+		wuo.SetOwnerUserID(*s)
 	}
 	return wuo
 }
@@ -303,6 +339,11 @@ func (wuo *WorkspaceUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Workspace.name": %w`, err)}
 		}
 	}
+	if v, ok := wuo.mutation.OwnerUserID(); ok {
+		if err := workspace.OwnerUserIDValidator(v); err != nil {
+			return &ValidationError{Name: "owner_user_id", err: fmt.Errorf(`ent: validator failed for field "Workspace.owner_user_id": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -337,6 +378,9 @@ func (wuo *WorkspaceUpdateOne) sqlSave(ctx context.Context) (_node *Workspace, e
 	}
 	if value, ok := wuo.mutation.Name(); ok {
 		_spec.SetField(workspace.FieldName, field.TypeString, value)
+	}
+	if value, ok := wuo.mutation.OwnerUserID(); ok {
+		_spec.SetField(workspace.FieldOwnerUserID, field.TypeString, value)
 	}
 	if wuo.mutation.ConnectionsCleared() {
 		edge := &sqlgraph.EdgeSpec{

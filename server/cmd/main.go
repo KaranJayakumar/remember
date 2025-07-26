@@ -25,7 +25,6 @@ func setupServer() {
 
 	if err != nil {
 		log.Fatalf("failed connecting to postgres: %v", err)
-
 	}
 
 	defer client.Close()

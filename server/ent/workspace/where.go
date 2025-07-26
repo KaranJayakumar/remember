@@ -59,6 +59,11 @@ func Name(v string) predicate.Workspace {
 	return predicate.Workspace(sql.FieldEQ(FieldName, v))
 }
 
+// OwnerUserID applies equality check predicate on the "owner_user_id" field. It's identical to OwnerUserIDEQ.
+func OwnerUserID(v string) predicate.Workspace {
+	return predicate.Workspace(sql.FieldEQ(FieldOwnerUserID, v))
+}
+
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Workspace {
 	return predicate.Workspace(sql.FieldEQ(FieldName, v))
@@ -122,6 +127,71 @@ func NameEqualFold(v string) predicate.Workspace {
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Workspace {
 	return predicate.Workspace(sql.FieldContainsFold(FieldName, v))
+}
+
+// OwnerUserIDEQ applies the EQ predicate on the "owner_user_id" field.
+func OwnerUserIDEQ(v string) predicate.Workspace {
+	return predicate.Workspace(sql.FieldEQ(FieldOwnerUserID, v))
+}
+
+// OwnerUserIDNEQ applies the NEQ predicate on the "owner_user_id" field.
+func OwnerUserIDNEQ(v string) predicate.Workspace {
+	return predicate.Workspace(sql.FieldNEQ(FieldOwnerUserID, v))
+}
+
+// OwnerUserIDIn applies the In predicate on the "owner_user_id" field.
+func OwnerUserIDIn(vs ...string) predicate.Workspace {
+	return predicate.Workspace(sql.FieldIn(FieldOwnerUserID, vs...))
+}
+
+// OwnerUserIDNotIn applies the NotIn predicate on the "owner_user_id" field.
+func OwnerUserIDNotIn(vs ...string) predicate.Workspace {
+	return predicate.Workspace(sql.FieldNotIn(FieldOwnerUserID, vs...))
+}
+
+// OwnerUserIDGT applies the GT predicate on the "owner_user_id" field.
+func OwnerUserIDGT(v string) predicate.Workspace {
+	return predicate.Workspace(sql.FieldGT(FieldOwnerUserID, v))
+}
+
+// OwnerUserIDGTE applies the GTE predicate on the "owner_user_id" field.
+func OwnerUserIDGTE(v string) predicate.Workspace {
+	return predicate.Workspace(sql.FieldGTE(FieldOwnerUserID, v))
+}
+
+// OwnerUserIDLT applies the LT predicate on the "owner_user_id" field.
+func OwnerUserIDLT(v string) predicate.Workspace {
+	return predicate.Workspace(sql.FieldLT(FieldOwnerUserID, v))
+}
+
+// OwnerUserIDLTE applies the LTE predicate on the "owner_user_id" field.
+func OwnerUserIDLTE(v string) predicate.Workspace {
+	return predicate.Workspace(sql.FieldLTE(FieldOwnerUserID, v))
+}
+
+// OwnerUserIDContains applies the Contains predicate on the "owner_user_id" field.
+func OwnerUserIDContains(v string) predicate.Workspace {
+	return predicate.Workspace(sql.FieldContains(FieldOwnerUserID, v))
+}
+
+// OwnerUserIDHasPrefix applies the HasPrefix predicate on the "owner_user_id" field.
+func OwnerUserIDHasPrefix(v string) predicate.Workspace {
+	return predicate.Workspace(sql.FieldHasPrefix(FieldOwnerUserID, v))
+}
+
+// OwnerUserIDHasSuffix applies the HasSuffix predicate on the "owner_user_id" field.
+func OwnerUserIDHasSuffix(v string) predicate.Workspace {
+	return predicate.Workspace(sql.FieldHasSuffix(FieldOwnerUserID, v))
+}
+
+// OwnerUserIDEqualFold applies the EqualFold predicate on the "owner_user_id" field.
+func OwnerUserIDEqualFold(v string) predicate.Workspace {
+	return predicate.Workspace(sql.FieldEqualFold(FieldOwnerUserID, v))
+}
+
+// OwnerUserIDContainsFold applies the ContainsFold predicate on the "owner_user_id" field.
+func OwnerUserIDContainsFold(v string) predicate.Workspace {
+	return predicate.Workspace(sql.FieldContainsFold(FieldOwnerUserID, v))
 }
 
 // HasConnections applies the HasEdge predicate on the "connections" edge.

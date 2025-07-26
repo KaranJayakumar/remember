@@ -19,6 +19,8 @@ type Workspace struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// OwnerUserID holds the value of the "owner_user_id" field.
+	OwnerUserID string `json:"owner_user_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the WorkspaceQuery when eager-loading is set.
 	Edges        WorkspaceEdges `json:"edges"`
@@ -48,7 +50,7 @@ func (*Workspace) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case workspace.FieldName:
+		case workspace.FieldName, workspace.FieldOwnerUserID:
 			values[i] = new(sql.NullString)
 		case workspace.FieldID:
 			values[i] = new(uuid.UUID)
@@ -78,6 +80,12 @@ func (w *Workspace) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				w.Name = value.String
+			}
+		case workspace.FieldOwnerUserID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field owner_user_id", values[i])
+			} else if value.Valid {
+				w.OwnerUserID = value.String
 			}
 		default:
 			w.selectValues.Set(columns[i], values[i])
@@ -122,6 +130,9 @@ func (w *Workspace) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", w.ID))
 	builder.WriteString("name=")
 	builder.WriteString(w.Name)
+	builder.WriteString(", ")
+	builder.WriteString("owner_user_id=")
+	builder.WriteString(w.OwnerUserID)
 	builder.WriteByte(')')
 	return builder.String()
 }

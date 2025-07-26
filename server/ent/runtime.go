@@ -45,6 +45,10 @@ func init() {
 	workspace.DefaultName = workspaceDescName.Default.(string)
 	// workspace.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	workspace.NameValidator = workspaceDescName.Validators[0].(func(string) error)
+	// workspaceDescOwnerUserID is the schema descriptor for owner_user_id field.
+	workspaceDescOwnerUserID := workspaceFields[2].Descriptor()
+	// workspace.OwnerUserIDValidator is a validator for the "owner_user_id" field. It is called by the builders before save.
+	workspace.OwnerUserIDValidator = workspaceDescOwnerUserID.Validators[0].(func(string) error)
 	// workspaceDescID is the schema descriptor for id field.
 	workspaceDescID := workspaceFields[0].Descriptor()
 	// workspace.DefaultID holds the default value on creation for the id field.

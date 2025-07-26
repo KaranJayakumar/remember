@@ -1659,6 +1659,7 @@ type WorkspaceMutation struct {
 	typ                string
 	id                 *uuid.UUID
 	name               *string
+	owner_user_id      *string
 	clearedFields      map[string]struct{}
 	connections        map[uuid.UUID]struct{}
 	removedconnections map[uuid.UUID]struct{}
@@ -1808,6 +1809,42 @@ func (m *WorkspaceMutation) ResetName() {
 	m.name = nil
 }
 
+// SetOwnerUserID sets the "owner_user_id" field.
+func (m *WorkspaceMutation) SetOwnerUserID(s string) {
+	m.owner_user_id = &s
+}
+
+// OwnerUserID returns the value of the "owner_user_id" field in the mutation.
+func (m *WorkspaceMutation) OwnerUserID() (r string, exists bool) {
+	v := m.owner_user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOwnerUserID returns the old "owner_user_id" field's value of the Workspace entity.
+// If the Workspace object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkspaceMutation) OldOwnerUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOwnerUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOwnerUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOwnerUserID: %w", err)
+	}
+	return oldValue.OwnerUserID, nil
+}
+
+// ResetOwnerUserID resets all changes to the "owner_user_id" field.
+func (m *WorkspaceMutation) ResetOwnerUserID() {
+	m.owner_user_id = nil
+}
+
 // AddConnectionIDs adds the "connections" edge to the Connection entity by ids.
 func (m *WorkspaceMutation) AddConnectionIDs(ids ...uuid.UUID) {
 	if m.connections == nil {
@@ -1896,9 +1933,12 @@ func (m *WorkspaceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *WorkspaceMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
 	if m.name != nil {
 		fields = append(fields, workspace.FieldName)
+	}
+	if m.owner_user_id != nil {
+		fields = append(fields, workspace.FieldOwnerUserID)
 	}
 	return fields
 }
@@ -1910,6 +1950,8 @@ func (m *WorkspaceMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case workspace.FieldName:
 		return m.Name()
+	case workspace.FieldOwnerUserID:
+		return m.OwnerUserID()
 	}
 	return nil, false
 }
@@ -1921,6 +1963,8 @@ func (m *WorkspaceMutation) OldField(ctx context.Context, name string) (ent.Valu
 	switch name {
 	case workspace.FieldName:
 		return m.OldName(ctx)
+	case workspace.FieldOwnerUserID:
+		return m.OldOwnerUserID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Workspace field %s", name)
 }
@@ -1936,6 +1980,13 @@ func (m *WorkspaceMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case workspace.FieldOwnerUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOwnerUserID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Workspace field %s", name)
@@ -1988,6 +2039,9 @@ func (m *WorkspaceMutation) ResetField(name string) error {
 	switch name {
 	case workspace.FieldName:
 		m.ResetName()
+		return nil
+	case workspace.FieldOwnerUserID:
+		m.ResetOwnerUserID()
 		return nil
 	}
 	return fmt.Errorf("unknown Workspace field %s", name)

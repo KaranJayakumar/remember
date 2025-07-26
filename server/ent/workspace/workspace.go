@@ -15,6 +15,8 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldOwnerUserID holds the string denoting the owner_user_id field in the database.
+	FieldOwnerUserID = "owner_user_id"
 	// EdgeConnections holds the string denoting the connections edge name in mutations.
 	EdgeConnections = "connections"
 	// Table holds the table name of the workspace in the database.
@@ -32,6 +34,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldName,
+	FieldOwnerUserID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -49,6 +52,8 @@ var (
 	DefaultName string
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// OwnerUserIDValidator is a validator for the "owner_user_id" field. It is called by the builders before save.
+	OwnerUserIDValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -64,6 +69,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByOwnerUserID orders the results by the owner_user_id field.
+func ByOwnerUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOwnerUserID, opts...).ToFunc()
 }
 
 // ByConnectionsCount orders the results by connections count.
