@@ -35,7 +35,7 @@
     "react-native-screens": "~4.10.0",
     "react-native-web": "~0.20.0",
     "tailwind-merge": "^3.3.1",
-    "react-native-svg": "15.11.2"
+    "expo-image": "~2.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

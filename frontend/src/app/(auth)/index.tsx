@@ -5,8 +5,8 @@ import { useSSO } from "@clerk/clerk-expo";
 import { View } from "react-native";
 import { Button } from "../../components/ui/button";
 import { Text } from "../../components/ui/text";
-import GoogleIcon from "../../components/icons/google";
 import { Platform } from "react-native";
+import { Image } from "expo-image";
 
 export const useWarmUpBrowser = () => {
   useEffect(() => {
@@ -25,6 +25,7 @@ export default function Page() {
   useWarmUpBrowser();
 
   const { startSSOFlow } = useSSO();
+  const googleLogoPath = require("../../assets/svg/google-main-icon.svg");
 
   const onPress = useCallback(async () => {
     try {
@@ -51,9 +52,7 @@ export default function Page() {
         variant={"outline"}
         className="flex-row items-center justify-center"
       >
-        <View className="w-6 h-6 items-center justify-center">
-          <GoogleIcon />
-        </View>
+        <Image source={googleLogoPath} width={24} height={24} />
         <Text className="ml-2">Sign in with Google</Text>
       </Button>
     </View>
