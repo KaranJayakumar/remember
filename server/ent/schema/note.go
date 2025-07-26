@@ -13,8 +13,7 @@ type Note struct {
 
 func (Note) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.UUID{}).Default(uuid.New),
-		field.UUID("connectionId", uuid.UUID{}),
+		field.UUID("connection_id", uuid.UUID{}),
 		field.String("content").NotEmpty(),
 	}
 }
@@ -23,7 +22,7 @@ func (Note) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("connection", Connection.Type).
 			Ref("notes").
-			Field("connectionId").
+			Field("connection_id").
 			Unique().
 			Required(),
 	}

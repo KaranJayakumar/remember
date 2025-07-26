@@ -13,9 +13,9 @@ type Tag struct {
 
 func (Tag) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.UUID{}).Default(uuid.New),
 		field.String("name").NotEmpty().Unique(),
 		field.String("value"),
+		field.UUID("connection_id", uuid.UUID{}),
 	}
 }
 
@@ -23,6 +23,8 @@ func (Tag) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("connections", Connection.Type).
 			Ref("tags").
-			Through("connection_tags", ConnectionTag.Type),
+			Field("connection_id").
+			Unique().
+			Required(),
 	}
 }
