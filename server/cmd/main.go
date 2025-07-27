@@ -2,9 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/KaranJayakumar/remember/ent"
@@ -35,8 +33,9 @@ func setupServer() {
 
 	router := gin.Default()
 
-	router.GET("/connections/:workspace_id", AuthMiddleware(), GetConnections(client))
 	router.GET("/workspaces", AuthMiddleware(), GetWorkspaces(client))
+
+	router.GET("/connections/:workspace_id", AuthMiddleware(), GetConnections(client))
 	router.POST("/connections", AuthMiddleware(), CreateConnection(client))
 
 	router.POST("/notes", AuthMiddleware(), CreateNote(client))
