@@ -35,9 +35,19 @@ func setupServer() {
 
 	router := gin.Default()
 
-	router.GET("/connections", AuthMiddleware(), GetConnections(client))
+	router.GET("/connections/:workspace_id", AuthMiddleware(), GetConnections(client))
 	router.GET("/workspaces", AuthMiddleware(), GetWorkspaces(client))
 	router.POST("/connections", AuthMiddleware(), CreateConnection(client))
+
+	router.POST("/notes", AuthMiddleware(), CreateNote(client))
+	router.GET("/notes/:connection_id", AuthMiddleware(), GetNotes(client))
+	router.PUT("/notes/:note_id", AuthMiddleware(), UpdateNote(client))
+	router.DELETE("/notes/:note_id", AuthMiddleware(), DeleteNote(client))
+
+	router.POST("/tags", AuthMiddleware(), CreateTag(client))
+	router.GET("/tags/:connection_id", AuthMiddleware(), GetTags(client))
+	router.PUT("/tags/:tag_id", AuthMiddleware(), UpdateTag(client))
+	router.DELETE("/tags/:tag_id", AuthMiddleware(), DeleteTag(client))
 
 	router.Run()
 
