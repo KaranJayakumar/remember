@@ -6,24 +6,13 @@ import { createConnectionApi } from "../../api/api";
 import { useState } from "react";
 import { Text } from "../../components/ui/text";
 import { Button } from "../../components/ui/button";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogClose,
-  DialogTitle,
-  DialogFooter,
-  DialogHeader,
-  DialogDescription,
-  DialogContent,
-} from "../../components/ui/dialog";
-import { Input } from "~/components/ui/input";
-import { ConnectionForm, ConnectionModal } from "~/components/connection-form";
+import { ConnectionModal } from "~/components/connection-form";
 
 export default function Homepage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { connections = [] } = useConnections();
   const { getToken } = useAuth();
-  const [name] = useState("My New Connection"); // Example static name
+  const [name] = useState("My New Connection");
 
   const createConnection = useMutation({
     mutationFn: async () => {
@@ -32,6 +21,7 @@ export default function Homepage() {
       return createConnectionApi(token, name);
     },
   });
+
   const openModal = () => {
     setIsModalOpen(true);
   };
