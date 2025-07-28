@@ -11,11 +11,13 @@ const queryClient = new QueryClient();
 
 export default function RootLayout() {
   return (
-    <ClerkProvider tokenCache={tokenCache}>
-      <QueryClientProvider client={queryClient}>
-        <Slot />
-      </QueryClientProvider>
+    <>
+      <ClerkProvider tokenCache={tokenCache}>
+        <QueryClientProvider client={queryClient}>
+          <Slot />
+        </QueryClientProvider>
+      </ClerkProvider>
       <PortalHost />
-    </ClerkProvider>
+    </>
   );
 }
