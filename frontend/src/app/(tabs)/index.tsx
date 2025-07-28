@@ -17,9 +17,10 @@ import {
   DialogContent,
 } from "../../components/ui/dialog";
 import { Input } from "~/components/ui/input";
-import { ConnectionForm } from "~/components/connection-form";
+import { ConnectionForm, ConnectionModal } from "~/components/connection-form";
 
 export default function Homepage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { connections = [] } = useConnections();
   const { getToken } = useAuth();
   const [name] = useState("My New Connection"); // Example static name
@@ -31,6 +32,9 @@ export default function Homepage() {
       return createConnectionApi(token, name);
     },
   });
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
 
   return (
     <View className="flex-1 flex-col justify-center items-center">
@@ -43,7 +47,13 @@ export default function Homepage() {
         </View>
       ))}
       <Text className="mb-4">Hello there, welcome to remember</Text>
-      <ConnectionForm />
+      <Button
+        className="flex-row items-center justify-center"
+        onPress={openModal}
+      >
+        <Text>Create a Connection</Text>
+      </Button>
+      <ConnectionModal isOpen={isModalOpen} setIsOpen={setIsModalOpen} />
     </View>
   );
 }
