@@ -53,8 +53,8 @@ export const ConnectionModal = ({ isOpen, setIsOpen }: ModalProps) => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen} className="flex-row w-full">
-      <DialogContent className="w-full">
+    <Dialog open={isOpen} onOpenChange={setIsOpen} asChild>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Create Connection</DialogTitle>
           <DialogDescription>

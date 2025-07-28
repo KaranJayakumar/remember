@@ -1,4 +1,4 @@
-import { View } from "react-native";
+mport { View } from "react-native";
 import { useConnections } from "../../hooks/useConnections";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-expo";
@@ -6,7 +6,7 @@ import { createConnectionApi } from "../../api/api";
 import { useState } from "react";
 import { Text } from "../../components/ui/text";
 import { Button } from "../../components/ui/button";
-import { ConnectionModal } from "~/components/connection-form";
+import { ConnectionModal } from "~/components/connection-modal";
 
 export default function Homepage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,7 +43,9 @@ export default function Homepage() {
       >
         <Text>Create a Connection</Text>
       </Button>
-      <ConnectionModal isOpen={isModalOpen} setIsOpen={setIsModalOpen} />
+      <View className="w-full bg-[#FF0000]">
+        <ConnectionModal isOpen={isModalOpen} setIsOpen={setIsModalOpen} />
+      </View>
     </View>
   );
 }
