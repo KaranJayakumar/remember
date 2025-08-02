@@ -44,8 +44,9 @@ func GetConnections(client *ent.Client) gin.HandlerFunc {
 }
 
 type CreateConnectionRequest struct {
-	Name     string
-	ImageUrl string
+	Name     string            `json:"name" binding:"required"`
+	ImageUrl *string           `json:"imageUrl,omitempty"`
+	Tags     map[string]string `json:"tags,omitempty"`
 }
 
 func CreateConnection(client *ent.Client) gin.HandlerFunc {
@@ -70,15 +71,32 @@ func CreateConnection(client *ent.Client) gin.HandlerFunc {
 			return
 		}
 
-		connection, err := client.Connection.Create().
+		builder := client.Connection.Create().
 			SetWorkspaceID(id).
-			SetName(body.Name).
-			SetImageURL(body.ImageUrl).
-			Save(c.Request.Context())
+			SetName(body.Name)
 
+		if body.ImageUrl != nil {
+			builder = builder.SetImageURL(*body.ImageUrl)
+		}
+
+		connection, err := builder.Save(c.Request.Context())
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "could not create connection"})
 			return
+		}
+
+		// Create tags if provided
+		for name, value := range body.Tags {
+			_, err := client.Tag.Create().
+				SetConnectionID(connection.ID).
+				SetName(name).
+				SetValue(value).
+				Save(c.Request.Context())
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create tag"})
+				return
+			}
 		}
 
 		c.JSON(http.StatusCreated, connection)
