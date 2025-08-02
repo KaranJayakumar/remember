@@ -3,16 +3,23 @@ import { Text } from "~/components/ui/text";
 import { Input } from "~/components/ui/input";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { View } from "react-native";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-type KVPair = { key: string; value: string };
+const KVPairSchema = z.object({
+  key: z.string().min(1, "Key is required"),
+  value: z.string().min(1, "Value is required"),
+});
 
-type Inputs = {
-  name: string;
-  tags: KVPair[];
-};
+const ConnectionSchema = z.object({
+  name: z.string().min(1, "Connection name is required"),
+  tags: z.array(KVPairSchema).optional().default([]),
+});
+
+type ConnectionFormData = z.infer<typeof ConnectionSchema>;
 
 interface FormProps {
-  onSubmit?: (data: { name: string; tags: Record<string, string> }) => void;
+  onSubmit: (data: { name: string; tags: Record<string, string> }) => Promise<void>;
 }
 
 export const ConnectionForm = ({ onSubmit }: FormProps) => {
@@ -20,7 +27,8 @@ export const ConnectionForm = ({ onSubmit }: FormProps) => {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<Inputs>({
+  } = useForm<ConnectionFormData>({
+    resolver: zodResolver(ConnectionSchema),
     defaultValues: {
       name: "",
       tags: [],
@@ -32,12 +40,12 @@ export const ConnectionForm = ({ onSubmit }: FormProps) => {
     name: "tags",
   });
 
-  const handleFormSubmit = (data: Inputs) => {
+  const handleFormSubmit = async (data: ConnectionFormData) => {
     const tags: Record<string, string> = {};
-    for (const { key, value } of data.tags) {
+    for (const { key, value } of data.tags || []) {
       if (key) tags[key] = value;
     }
-    onSubmit?.({ name: data.name, tags });
+    await onSubmit({ name: data.name, tags });
   };
 
   return (
@@ -52,7 +60,6 @@ export const ConnectionForm = ({ onSubmit }: FormProps) => {
       <Controller
         control={control}
         name="name"
-        rules={{ required: "Connection name is required" }}
         render={({ field: { onChange, value } }) => (
           <Input
             value={value}
@@ -62,9 +69,7 @@ export const ConnectionForm = ({ onSubmit }: FormProps) => {
         )}
       />
       {errors.name && (
-        <Text className="text-red-500 text-sm mt-1">
-          {errors.name.message}
-        </Text>
+        <Text className="text-red-500 text-sm mt-1">{errors.name.message}</Text>
       )}
 
       <View className="mt-4">
