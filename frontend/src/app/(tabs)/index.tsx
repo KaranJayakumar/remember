@@ -1,4 +1,4 @@
-mport { View } from "react-native";
+import { View } from "react-native";
 import { useConnections } from "../../hooks/useConnections";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-expo";
