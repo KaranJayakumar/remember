@@ -1,3 +1,5 @@
+import { Workspace } from "~/types/connections";
+
 export async function createConnectionApi({
   token,
   name,
@@ -38,7 +40,7 @@ export async function listWorkspacesApi({
   token,
 }: {
   token: string;
-}) {
+}) : Promise<Workspace[]>{
   const res = await fetch(
     `${process.env.EXPO_PUBLIC_BASE_API_URL}/workspaces`,
     {

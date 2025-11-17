@@ -3,29 +3,39 @@ import { useAuth } from "@clerk/clerk-expo";
 import { createConnectionApi, listWorkspacesApi } from "~/api/api";
 import { appStorage } from "~/lib/storage";
 import { useMemo } from "react";
+import { Workspace } from "~/types/connections";
 
 const WORKSPACE_KEY = 'workspace'
 export const useWorkspace = () => {
   const { getToken } = useAuth();
 
-  const workspace = useMemo(() => {
-    return getCurrentWorkspace()
-  }, [])
 
   const getCurrentWorkspace = async () => {
-    let workspace = await appStorage.getItem(WORKSPACE_KEY);
-    if(!workspace){
-      const workspaces = getWorkspaces()
+    const storedWorkspace = await appStorage.getItem(WORKSPACE_KEY)
+    let workspace :Workspace | null = null
+    if(storedWorkspace){
+      console.log("No stored ws")
+       workspace = JSON.parse(storedWorkspace);
+    }else{
+      console.log("Fetching")
+      const workspaces = await getWorkspaces()
       workspace = workspaces[0]
-      await appStorage.setItem(WORKSPACE_KEY, workspace)
+      console.log("data")
+      console.log(workspaces)
+      await appStorage.setItem(WORKSPACE_KEY, JSON.stringify(workspace))
     }
     return workspace
   }
+
+  const workspace = useMemo(() => {
+    return getCurrentWorkspace()
+  }, [])
 
   const getWorkspaces = async () => {
     const token = await getToken();
     if (!token) throw new Error("No session token available");
     const data = listWorkspacesApi({token})
+    return data
   };
 
   const {
