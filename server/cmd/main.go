@@ -9,6 +9,7 @@ import (
 	"github.com/KaranJayakumar/remember/ent/migrate"
 	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
 	_ "github.com/lib/pq"
 )
 
@@ -35,19 +36,22 @@ func setupServer() {
 
 	router.GET("/workspaces", AuthMiddleware(), GetWorkspaces(client))
 
-	router.GET("/connections/:workspace_id", AuthMiddleware(), GetConnections(client))
-	router.POST("/connections", AuthMiddleware(), CreateConnection(client))
+	router.GET("/workspaces/:workspace_id/connections", AuthMiddleware(), GetConnections(client))
+	router.POST("/workspaces/:workspace_id/connections", AuthMiddleware(), CreateConnection(client))
 
-	router.POST("/notes", AuthMiddleware(), CreateNote(client))
-	router.GET("/notes/:connection_id", AuthMiddleware(), GetNotes(client))
+	router.POST("/connections/:connection_id/notes", AuthMiddleware(), CreateNote(client))
+	router.GET("/connections/:connection_id/notes", AuthMiddleware(), GetNotes(client))
+
 	router.PUT("/notes/:note_id", AuthMiddleware(), UpdateNote(client))
 	router.DELETE("/notes/:note_id", AuthMiddleware(), DeleteNote(client))
 
-	router.POST("/tags", AuthMiddleware(), CreateTag(client))
-	router.GET("/tags/:connection_id", AuthMiddleware(), GetTags(client))
+	router.POST("/connections/:connection_id/tags", AuthMiddleware(), CreateTag(client))
+	router.GET("/connections/:connection_id/tags", AuthMiddleware(), GetTags(client))
+
 	router.PUT("/tags/:tag_id", AuthMiddleware(), UpdateTag(client))
 	router.DELETE("/tags/:tag_id", AuthMiddleware(), DeleteTag(client))
 
+	router.Use(cors.Default())
 	router.Run(":4444")
 
 }
