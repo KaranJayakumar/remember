@@ -13,7 +13,7 @@ services:
       app_database:
         condition: service_healthy
     ports:
-      - "8888:8080"
+      - "4444:4444"
   app_database:
     image: postgres:latest
     ports:

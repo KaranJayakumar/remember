@@ -48,6 +48,6 @@ func setupServer() {
 	router.PUT("/tags/:tag_id", AuthMiddleware(), UpdateTag(client))
 	router.DELETE("/tags/:tag_id", AuthMiddleware(), DeleteTag(client))
 
-	router.Run()
+	router.Run(":4444")
 
 }
