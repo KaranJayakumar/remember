@@ -5,6 +5,7 @@ import (
 	"github.com/KaranJayakumar/remember/ent/workspace"
 	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/gin-gonic/gin"
+	"fmt"
 	"net/http"
 )
 
@@ -18,7 +19,7 @@ func GetWorkspaces(client *ent.Client) gin.HandlerFunc {
 
 		workspaces, err := client.Workspace.
 			Query().
-			Where(workspace.OwnerUserIDEQ(claims.ID)).
+			Where(workspace.OwnerUserIDEQ(claims.Subject)).
 			All(c.Request.Context())
 
 		if err != nil {
@@ -28,11 +29,12 @@ func GetWorkspaces(client *ent.Client) gin.HandlerFunc {
 		if len(workspaces) == 0 {
 			workspace, err := client.Workspace.
 				Create().
-				SetOwnerUserID(claims.ID).
+				SetOwnerUserID(claims.Subject).
 				SetName("Default Workspace").
 				Save(c.Request.Context())
 
 			if err != nil {
+				fmt.Print(err)
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create workspace"})
 				return
 			}

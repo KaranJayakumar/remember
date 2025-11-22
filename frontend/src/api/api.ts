@@ -1,4 +1,4 @@
-import { Workspace } from "~/types/connections";
+import { Connection, Workspace } from "~/types/connections";
 
 export async function createConnectionApi({
   token,
@@ -43,6 +43,33 @@ export async function listWorkspacesApi({
 }) : Promise<Workspace[]>{
   const res = await fetch(
     `${process.env.EXPO_PUBLIC_BASE_API_URL}/workspaces`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    },
+  );
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Failed to create connection: ${res.status} ${errorText}`);
+  }
+
+  const data = await res.json();
+  return data;
+}
+
+export async function getConnectionsApi({
+  token,
+  workspaceId
+}: {
+  token: string;
+  workspaceId : string,
+}) : Promise<Connection[]>{
+  const res = await fetch(
+    `${process.env.EXPO_PUBLIC_BASE_API_URL}/workspaces/${workspaceId}/connections`,
     {
       method: "GET",
       headers: {

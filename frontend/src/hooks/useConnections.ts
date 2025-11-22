@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-expo";
-import { createConnectionApi } from "~/api/api";
+import { createConnectionApi, getConnectionsApi } from "~/api/api";
+import { useWorkspace } from "./useWorkspaces";
 
 export const useConnections = () => {
   const { getToken } = useAuth();
@@ -8,27 +9,8 @@ export const useConnections = () => {
   const getConnections = async () => {
     const token = await getToken();
     if (!token) throw new Error("No session token available");
-
-    const res = await fetch(
-      `${process.env.EXPO_PUBLIC_BASE_API_URL}/connections`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(
-        `Failed to fetch connections: ${res.status} ${errorText}`,
-      );
-    }
-
-    const data = await res.json();
-    return data.connections;
+    const {workspace} = useWorkspace()
+    return getConnectionsApi({token, workspaceId : workspace?.id || ''})
   };
 
   const {

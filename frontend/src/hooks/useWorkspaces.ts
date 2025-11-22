@@ -12,24 +12,20 @@ export const useWorkspace = () => {
 
   const getCurrentWorkspace = async () => {
     const storedWorkspace = await appStorage.getItem(WORKSPACE_KEY)
-    let workspace :Workspace | null = null
+    let workspace : Workspace; 
     if(storedWorkspace){
-      console.log("No stored ws")
        workspace = JSON.parse(storedWorkspace);
     }else{
-      console.log("Fetching")
       const workspaces = await getWorkspaces()
       workspace = workspaces[0]
-      console.log("data")
-      console.log(workspaces)
       await appStorage.setItem(WORKSPACE_KEY, JSON.stringify(workspace))
     }
     return workspace
   }
-
-  const workspace = useMemo(() => {
-    return getCurrentWorkspace()
-  }, [])
+  const { data: workspace } = useQuery({
+    queryKey: ["currentWorkspace"],
+    queryFn: getCurrentWorkspace,
+  });
 
   const getWorkspaces = async () => {
     const token = await getToken();
