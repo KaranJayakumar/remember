@@ -5,6 +5,7 @@ import { useWorkspace } from "./useWorkspaces";
 
 export const useConnections = () => {
   const { getToken } = useAuth();
+    const { workspace } = useWorkspace()
 
   const getConnections = async () => {
     const token = await getToken();
@@ -36,7 +37,7 @@ export const useConnections = () => {
       const token = await getToken();
       if (!token) throw new Error("Missing token");
 
-      return createConnectionApi({ token, name, tags, imageUrl });
+      return createConnectionApi({ token, name, tags, imageUrl, workspaceId : workspace?.id || ''});
     },
   });
 

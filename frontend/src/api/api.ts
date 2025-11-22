@@ -5,14 +5,16 @@ export async function createConnectionApi({
   name,
   tags,
   imageUrl,
+  workspaceId, 
 }: {
   token: string;
   name: string;
   tags?: Record<string, string>;
   imageUrl?: string;
+  workspaceId : string,
 }) {
   const res = await fetch(
-    `${process.env.EXPO_PUBLIC_BASE_API_URL}/connections`,
+    `${process.env.EXPO_PUBLIC_BASE_API_URL}/workspaces/${workspaceId}/connections`,
     {
       method: "POST",
       headers: {
