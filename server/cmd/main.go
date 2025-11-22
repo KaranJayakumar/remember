@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
@@ -25,6 +24,7 @@ func setupServer() {
 
 	if err != nil {
 		log.Fatalf("failed connecting to postgres: %v", err)
+
 	}
 
 	defer client.Close()
@@ -37,9 +37,7 @@ func setupServer() {
 	router := gin.Default()
 	router.Use(cors.Default())
 
-	router.GET("/test", Test(client))
-
-	router.GET("/workspaces", AuthMiddleware(), GetWorkspaces(client))
+	router.OPTIONS("/test", Test(client))
 
 	router.GET("/workspaces", AuthMiddleware(), GetWorkspaces(client))
 
@@ -61,6 +59,7 @@ func setupServer() {
 	router.Run(":4444")
 
 }
+
 func Test(client *ent.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.Println("GOT THE REQUEST")
