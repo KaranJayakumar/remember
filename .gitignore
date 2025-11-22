@@ -27,3 +27,6 @@ go.work.sum
 
 # Server Binaries
 server/bin/*
+
+# Tmp files
+/server/tmp/*
