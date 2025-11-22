@@ -4,12 +4,11 @@ import (
 	"context"
 	"log"
 	"os"
-
 	"github.com/KaranJayakumar/remember/ent"
 	"github.com/KaranJayakumar/remember/ent/migrate"
 	"github.com/clerk/clerk-sdk-go/v2"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
 	_ "github.com/lib/pq"
 	"net/http"
 )
@@ -33,11 +32,14 @@ func setupServer() {
 		log.Fatalf("failed printing schema changes: %v", err)
 	}
 	clerk.SetKey(os.Getenv("CLERK_SECRET_KEY"))
-
 	router := gin.Default()
-	router.Use(cors.Default())
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"*"}
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	config.AllowHeaders = []string{"Content-Type", "Authorization"}
+	router.Use(cors.New(config))
 
-	router.OPTIONS("/test", Test(client))
+	router.GET("/test", Test(client))
 
 	router.GET("/workspaces", AuthMiddleware(), GetWorkspaces(client))
 
@@ -55,8 +57,8 @@ func setupServer() {
 
 	router.PUT("/tags/:tag_id", AuthMiddleware(), UpdateTag(client))
 	router.DELETE("/tags/:tag_id", AuthMiddleware(), DeleteTag(client))
-
 	router.Run(":4444")
+
 
 }
 
