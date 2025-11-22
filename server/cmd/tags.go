@@ -157,4 +157,3 @@ func DeleteTag(client *ent.Client) gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{"message": "tag deleted"})
 	}
 }
-

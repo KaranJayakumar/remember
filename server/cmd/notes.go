@@ -142,4 +142,3 @@ func DeleteNote(client *ent.Client) gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{"message": "note deleted"})
 	}
 }
-

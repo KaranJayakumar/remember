@@ -33,7 +33,7 @@ func GetWorkspaces(client *ent.Client) gin.HandlerFunc {
 				Save(c.Request.Context())
 
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create workspace"})
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create workspace"})
 				return
 			}
 			workspaces = []*ent.Workspace{workspace}
