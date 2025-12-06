@@ -12,10 +12,12 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Text } from '@/components/ui/text';
 import * as React from 'react';
+import { useRouter } from 'expo-router';
 import { Pressable, type TextInput, View } from 'react-native';
  
 export function SignInForm() {
   const passwordInputRef = React.useRef<TextInput>(null);
+  const router = useRouter();
  
   function onEmailSubmitEditing() {
     passwordInputRef.current?.focus();
@@ -23,6 +25,10 @@ export function SignInForm() {
  
   function onSubmit() {
     // TODO: Submit form and navigate to protected screen if successful
+  }
+
+  const handleSignUpNav = () => {
+    router.navigate('/sign-up')
   }
  
   return (
@@ -77,9 +83,7 @@ export function SignInForm() {
           <Text className="text-center text-sm">
             Don&apos;t have an account?{' '}
             <Pressable
-              onPress={() => {
-                // TODO: Navigate to sign up screen
-              }}>
+              onPress={handleSignUpNav}>
               <Text className="text-sm underline underline-offset-4">Sign up</Text>
             </Pressable>
           </Text>
