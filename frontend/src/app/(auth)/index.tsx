@@ -7,6 +7,7 @@ import { Button } from "../../components/ui/button";
 import { Text } from "../../components/ui/text";
 import { Platform } from "react-native";
 import { Image } from "expo-image";
+import { SignInForm } from "~/components/auth/sign-in-form";
 
 export const useWarmUpBrowser = () => {
   useEffect(() => {
@@ -47,6 +48,7 @@ export default function Page() {
 
   return (
     <View className="flex-1 justify-center items-center">
+      <SignInForm/>
       <Button
         onPress={onPress}
         variant={"outline"}
