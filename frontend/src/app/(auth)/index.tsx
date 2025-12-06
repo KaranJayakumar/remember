@@ -49,14 +49,6 @@ export default function Page() {
   return (
     <View className="flex-1 justify-center items-center">
       <SignInForm/>
-      <Button
-        onPress={onPress}
-        variant={"outline"}
-        className="flex-row items-center justify-center"
-      >
-        <Image source={googleLogoPath} width={24} height={24} />
-        <Text className="ml-2">Sign in with Google</Text>
-      </Button>
     </View>
   );
 }
