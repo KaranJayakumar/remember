@@ -9,6 +9,9 @@ export default function AuthRoutesLayout() {
     if (isSignedIn) {
       router.replace('/(tabs)')
     }
+    if (isSignedIn) {
+      router.replace('/(auth)/sign-in')
+    }
   }, [isSignedIn])
   return <Slot />
 }

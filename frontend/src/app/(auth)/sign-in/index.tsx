@@ -3,10 +3,7 @@ import * as WebBrowser from "expo-web-browser";
 import * as AuthSession from "expo-auth-session";
 import { useSSO } from "@clerk/clerk-expo";
 import { View } from "react-native";
-import { Button } from "../../components/ui/button";
-import { Text } from "../../components/ui/text";
 import { Platform } from "react-native";
-import { Image } from "expo-image";
 import { SignInForm } from "~/components/auth/sign-in-form";
 
 export const useWarmUpBrowser = () => {
@@ -26,7 +23,7 @@ export default function Page() {
   useWarmUpBrowser();
 
   const { startSSOFlow } = useSSO();
-  const googleLogoPath = require("../../assets/svg/google-main-icon.svg");
+  const googleLogoPath = require("../../../assets/svg/google-main-icon.svg");
 
   const onPress = useCallback(async () => {
     try {
@@ -52,3 +49,4 @@ export default function Page() {
     </View>
   );
 }
+
