@@ -26,18 +26,19 @@ export function SignUpForm() {
 
   async function onSubmit() {
     if (!isLoaded || !setActive) return
+    setError('')
     try{
-      const signInAttempt = await signUp.create({
+      const signUpAttempt = await signUp.create({
         emailAddress: emailAddress,
-        password,
+        password : password,
       })
-      if (signInAttempt.status === 'complete') {
+      if (signUpAttempt.status === 'complete') {
         await setActive({
-          session: signInAttempt.createdSessionId,
+          session: signUpAttempt.createdSessionId,
         })
         router.replace('/(tabs)/')
       } else {
-        console.error(JSON.stringify(signInAttempt, null, 2))
+        console.error(JSON.stringify(signUpAttempt, null, 2))
       }
     }catch(err){
      if (isClerkAPIResponseError(err)){
@@ -82,11 +83,11 @@ export function SignUpForm() {
                 onSubmitEditing={onSubmit}
               />
               {
-                error && (
+                error ? (
                   <Text className="text-center text-sm text-red-600">
                     {error}
                   </Text>
-                )
+                ) : null
               }
             </View>
             <Button className="w-full" onPress={onSubmit}>
