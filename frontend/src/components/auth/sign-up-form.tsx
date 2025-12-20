@@ -9,22 +9,43 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { Text } from '@/components/ui/text';
 import * as React from 'react';
 import { Pressable, TextInput, View } from 'react-native';
+import { useState } from 'react';
+import { useRouter } from 'expo-router';
+import { isClerkAPIResponseError, useSignUp } from '@clerk/clerk-expo';
  
 export function SignUpForm() {
-  const passwordInputRef = React.useRef<TextInput>(null);
- 
-  function onEmailSubmitEditing() {
-    passwordInputRef.current?.focus();
+  const router = useRouter();
+  const [emailAddress, setEmailAddress] = useState('')
+  const [error, setError] = useState('')
+  const [password, setPassword] = useState('')
+
+  const { signUp, isLoaded, setActive } = useSignUp()
+
+  async function onSubmit() {
+    if (!isLoaded || !setActive) return
+    try{
+      const signInAttempt = await signUp.create({
+        emailAddress: emailAddress,
+        password,
+      })
+      if (signInAttempt.status === 'complete') {
+        await setActive({
+          session: signInAttempt.createdSessionId,
+        })
+        router.replace('/(tabs)/')
+      } else {
+        console.error(JSON.stringify(signInAttempt, null, 2))
+      }
+    }catch(err){
+     if (isClerkAPIResponseError(err)){
+       setError(err.message)
+     } 
+    }
   }
- 
-  function onSubmit() {
-    // TODO: Submit form and navigate to protected screen if successful
-  }
- 
+
   return (
     <View className="gap-6">
       <Card className="border-border/0 sm:border-border shadow-none sm:shadow-sm sm:shadow-black/5">
@@ -44,7 +65,7 @@ export function SignUpForm() {
                 keyboardType="email-address"
                 autoComplete="email"
                 autoCapitalize="none"
-                onSubmitEditing={onEmailSubmitEditing}
+                onChangeText={(text) => setEmailAddress(text)}
                 returnKeyType="next"
                 submitBehavior="submit"
               />
@@ -54,12 +75,19 @@ export function SignUpForm() {
                 <Label htmlFor="password">Password</Label>
               </View>
               <Input
-                ref={passwordInputRef}
                 id="password"
                 secureTextEntry
+                onChangeText={(text) => setPassword(text)}
                 returnKeyType="send"
                 onSubmitEditing={onSubmit}
               />
+              {
+                error && (
+                  <Text className="text-center text-sm text-red-600">
+                    {error}
+                  </Text>
+                )
+              }
             </View>
             <Button className="w-full" onPress={onSubmit}>
               <Text>Continue</Text>
@@ -68,12 +96,12 @@ export function SignUpForm() {
           <Text className="text-center text-sm">
             Already have an account?{' '}
             <Pressable
-              onPress={() => {
-                // TODO: Navigate to sign in screen
-              }}>
+              onPress={() => {router.navigate('/auth/sign-in')}}>
               <Text className="text-sm underline underline-offset-4">Sign in</Text>
             </Pressable>
           </Text>
+          <View id='clerk-captcha'>
+          </View>
         </CardContent>
       </Card>
     </View>

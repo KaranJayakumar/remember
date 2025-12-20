@@ -18,7 +18,6 @@ import { isClerkAPIResponseError, useSignIn } from '@clerk/clerk-expo';
 import { useState } from 'react';
  
 export function SignInForm() {
-  const passwordInputRef = React.useRef<TextInput>(null);
   const router = useRouter();
   const [emailAddress, setEmailAddress] = useState('')
   const [error, setError] = useState('')
@@ -81,7 +80,6 @@ export function SignInForm() {
                 <Label htmlFor="password">Password</Label>
               </View>
               <Input
-                ref={passwordInputRef}
                 id="password"
                 secureTextEntry
                 returnKeyType="send"
