@@ -1,27 +1,16 @@
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Tabs } from "expo-router";
+import { Tabs,TabTrigger, TabSlot } from 'expo-router/ui';
+import { CustomTabList } from "~/components/layout/custom-tab-list";
+import { Text } from "~/components/ui/text";
 
 export default function TabLayout() {
   return (
-    <Tabs screenOptions={{ tabBarActiveTintColor: "blue", headerShown: false }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="home" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: "Settings",
-          tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="cog" color={color} />
-          ),
-        }}
-      />
+    <Tabs>
+      <TabSlot />
+      <CustomTabList>
+        <TabTrigger name="home" href="/auth/sign-in">
+          <Text>Home</Text>
+        </TabTrigger>
+      </CustomTabList>
     </Tabs>
   );
 }
