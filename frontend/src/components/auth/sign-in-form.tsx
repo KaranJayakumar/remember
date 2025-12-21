@@ -36,7 +36,7 @@ export function SignInForm() {
         await setActive({
           session: signInAttempt.createdSessionId,
         })
-        router.replace('/(tabs)/')
+        router.replace('/contacts')
       } else {
         console.error(JSON.stringify(signInAttempt, null, 2))
       }
