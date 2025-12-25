@@ -1,24 +1,25 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-expo";
 import { createConnectionApi, listWorkspacesApi } from "~/api/api";
-import { appStorage } from "~/lib/storage";
 import { useMemo } from "react";
 import { Workspace } from "~/types/connections";
+import { useAsyncStorage } from "@react-native-async-storage/async-storage";
 
 const WORKSPACE_KEY = 'workspace'
 export const useWorkspace = () => {
   const { getToken } = useAuth();
+  const { getItem, setItem } = useAsyncStorage(WORKSPACE_KEY)
 
 
   const getCurrentWorkspace = async () => {
-    const storedWorkspace = await appStorage.getItem(WORKSPACE_KEY)
+    const storedWorkspace = await getItem()
     let workspace : Workspace; 
     if(storedWorkspace){
        workspace = JSON.parse(storedWorkspace);
     }else{
       const workspaces = await getWorkspaces()
       workspace = workspaces[0]
-      await appStorage.setItem(WORKSPACE_KEY, JSON.stringify(workspace))
+      await setItem(JSON.stringify(workspace))
     }
     return workspace
   }
