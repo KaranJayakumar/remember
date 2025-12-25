@@ -49,7 +49,7 @@ export const ConnectionForm = ({ onSubmit }: FormProps) => {
   };
 
   return (
-    <View className="p-4">
+    <View className="py-4 w-full">
       <View className="mb-4">
         <Text className="text-lg font-semibold mb-2">Create Connection</Text>
         <Text className="text-gray-600 mb-4">
