@@ -96,14 +96,14 @@ export function SignInForm() {
             <Button className="w-full" onPress={onSubmit}>
               <Text>Continue</Text>
             </Button>
-            <Text className="text-center text-sm">
+            <Text className="text-center text-sm jusify-center items-center">
               Don&apos;t have an account?{' '}
-              <Pressable
+              <Text
                 onPress={() => {
                   handleSignUpNav()
                 }}>
-                <Text className="text-sm underline underline-offset-4">Sign up</Text>
-              </Pressable>
+                <Text className="text-sm">Sign up</Text>
+              </Text>
             </Text>
           </View>
         </CardContent>

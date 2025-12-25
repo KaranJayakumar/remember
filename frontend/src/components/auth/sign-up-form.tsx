@@ -96,13 +96,13 @@ export function SignUpForm() {
           </View>
           <Text className="text-center text-sm">
             Already have an account?{' '}
-            <Pressable
-              onPress={() => {router.navigate('/auth/sign-in')}}>
-              <Text className="text-sm underline underline-offset-4">Sign in</Text>
-            </Pressable>
+            <Text
+              className="text-sm text-primary underline"
+              onPress={() => router.navigate('/auth/sign-in')}
+            >
+              Sign in
+            </Text>
           </Text>
-          <View id='clerk-captcha'>
-          </View>
         </CardContent>
       </Card>
     </View>
