@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { View } from "react-native";
 import { ConnectionForm } from "~/components/connection-form";
 import { ConnectionPill } from "~/components/ui/connections/connection-pill";
@@ -12,13 +13,24 @@ const mockConnections : Connection []= [{
 }]
 export default function Homepage() {
   const { createConnection, connections } = useConnections();
+  const [filteredConnections, setFilteredConnections] = useState<Connection[]>([])
+  useEffect(() => {
+    setFilteredConnections(mockConnections)
+  }, [mockConnections])
 
   const handleConnectionCreation = async (data: { name: string; tags: Record<string, string> }) => {
     await createConnection(data.name, data.tags);
   };
 
   const onSearch = (searchTerm : string) => {
-    return
+    if(!searchTerm || searchTerm.length == 0){
+      setFilteredConnections(mockConnections)
+      return
+    }
+    let searchResults = filteredConnections.filter((connection) => {
+      return connection.name.toLowerCase().includes(searchTerm)
+    })
+    setFilteredConnections(searchResults)
   }
 
   return (
@@ -28,7 +40,7 @@ export default function Homepage() {
           <ContactSearchBar onChange={onSearch}/>
           <View className="mt-4">
             {
-              mockConnections.map((connection, index) => {
+              filteredConnections.map((connection, index) => {
                 return (
                   <ConnectionPill key={index} name={connection.name} imageUrl={connection.imageUrl}/>
                 )
