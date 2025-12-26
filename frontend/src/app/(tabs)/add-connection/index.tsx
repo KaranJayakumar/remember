@@ -54,9 +54,6 @@ export default function Homepage() {
           </View>
         </View>
       </View>
-      <View className="justify-end flex flex-row mr-6">
-        <AddConnection/>
-      </View>
     </>
   );
 }
