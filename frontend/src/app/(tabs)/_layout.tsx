@@ -1,6 +1,6 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
-import { Cog, Home } from 'lucide-react-native';
+import { Cog, Home, PlusCircle } from 'lucide-react-native';
+import { View } from 'react-native';
 
 export default function TabLayout() {
   return (
@@ -13,7 +13,20 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="add-connection"
+        name="add-connection/index"
+        options={{
+          title : '',
+          tabBarIcon: ({ color }) => {
+            return(
+              <View className="pt-2">
+                <PlusCircle width={30} height={30}/>
+              </View>
+            )
+          },
+        }}
+      />
+      <Tabs.Screen
+        name="settings/index"
         options={{
           title: 'Settings',
           tabBarIcon: ({ color }) => <Cog/>,

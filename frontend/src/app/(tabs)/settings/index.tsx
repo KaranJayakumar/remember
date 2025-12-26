@@ -1,7 +1,5 @@
-import { PlusCircle } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { View } from "react-native";
-import { ConnectionForm } from "~/components/connection-form";
 import { AddConnection } from "~/components/ui/connections/add-connection";
 import { ConnectionPill } from "~/components/ui/connections/connection-pill";
 import { ContactSearchBar } from "~/components/ui/contact-search-bar";
@@ -20,16 +18,13 @@ const mockConnections : Connection []= [
     imageUrl : 'https://i.pravatar.cc/300'
   },
 ]
-export default function Homepage() {
-  const { createConnection, connections } = useConnections();
+
+export default function Settings() {
+  const { connections } = useConnections();
   const [filteredConnections, setFilteredConnections] = useState<Connection[]>([])
   useEffect(() => {
     setFilteredConnections(mockConnections)
   }, [mockConnections])
-
-  const handleConnectionCreation = async (data: { name: string; tags: Record<string, string> }) => {
-    await createConnection(data.name, data.tags);
-  };
 
   const onSearch = (searchTerm : string) => {
     if(!searchTerm || searchTerm.length == 0){
@@ -64,5 +59,3 @@ export default function Homepage() {
     </>
   );
 }
-
-
