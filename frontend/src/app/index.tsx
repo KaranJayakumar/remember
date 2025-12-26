@@ -19,7 +19,7 @@ export default function Page() {
 
     if (isSignedIn) {
       console.log("Signed in → navigating to /tabs")
-      router.replace("/contacts")
+      router.replace("/(tabs)")
     } else {
       console.log("Not signed in → navigating to /auth")
       router.replace("/auth")
