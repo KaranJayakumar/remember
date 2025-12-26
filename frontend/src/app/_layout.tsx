@@ -1,5 +1,5 @@
-import { Slot } from "expo-router";
-import { ClerkProvider } from "@clerk/clerk-expo";
+import { Slot, Stack } from "expo-router";
+import { ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-expo";
 import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import * as SplashScreen from "expo-splash-screen";
 import { PortalHost } from "@rn-primitives/portal";
@@ -17,7 +17,14 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <SafeAreaProvider>
             <SafeAreaView className='flex-1'>
-              <Slot />
+              <Stack screenOptions={{ headerShown: false }}>
+                <SignedIn>
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                </SignedIn>
+                <SignedOut>
+                  <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                </SignedOut>
+              </Stack>
             </SafeAreaView>
           </SafeAreaProvider>
         </QueryClientProvider>

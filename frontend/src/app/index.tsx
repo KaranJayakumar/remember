@@ -22,7 +22,7 @@ export default function Page() {
       router.replace("/(tabs)")
     } else {
       console.log("Not signed in → navigating to /auth")
-      router.replace("/auth")
+      router.replace("/(auth)")
     }
   }, [isLoaded, isSignedIn])
 
