@@ -8,6 +8,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
+          headerShown : false,
           title: 'Home',
           tabBarIcon: ({ color }) => <Home/>,
         }}
@@ -15,6 +16,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="add-connection/index"
         options={{
+          headerShown : false,
           title : '',
           tabBarIcon: ({ color }) => {
             return(
@@ -28,6 +30,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="settings/index"
         options={{
+          headerShown : false,
           title: 'Settings',
           tabBarIcon: ({ color }) => <Cog/>,
         }}
