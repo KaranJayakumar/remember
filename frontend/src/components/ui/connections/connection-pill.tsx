@@ -7,7 +7,7 @@ interface Props{
 }
 export const ConnectionPill = ({name, imageUrl} : Props) => {
   return (
-    <View className="border rounded-2xl flex flex-row items-center h-14">
+    <View className="border rounded-2xl flex flex-row items-center h-14 mb-4">
       <View className="ml-2 mr-4">
         <Avatar alt="Connection Avatar">
           <AvatarImage source={{ uri: imageUrl }} />

@@ -1,16 +1,25 @@
+import { PlusCircle } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { View } from "react-native";
 import { ConnectionForm } from "~/components/connection-form";
+import { AddConnection } from "~/components/ui/connections/add-connection";
 import { ConnectionPill } from "~/components/ui/connections/connection-pill";
 import { ContactSearchBar } from "~/components/ui/contact-search-bar";
 import { useConnections } from "~/hooks/useConnections";
 import { Connection } from "~/types/connections";
 
-const mockConnections : Connection []= [{
-  id : 'asdjflkjl', 
-  name : 'Janine', 
-  imageUrl : 'https://i.pravatar.cc/300'
-}]
+const mockConnections : Connection []= [
+  {
+    id : 'asdjflkjl', 
+    name : 'Joe', 
+    imageUrl : 'https://i.pravatar.cc/300'
+  },
+  {
+    id : 'yellow', 
+    name : 'Yellow', 
+    imageUrl : 'https://i.pravatar.cc/300'
+  },
+]
 export default function Homepage() {
   const { createConnection, connections } = useConnections();
   const [filteredConnections, setFilteredConnections] = useState<Connection[]>([])
@@ -49,6 +58,10 @@ export default function Homepage() {
           </View>
         </View>
       </View>
+      <View className="justify-end flex flex-row mr-6">
+        <AddConnection/>
+      </View>
     </>
   );
 }
+
