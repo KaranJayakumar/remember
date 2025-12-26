@@ -8,28 +8,16 @@ import { ContactSearchBar } from "~/components/ui/contact-search-bar";
 import { useConnections } from "~/hooks/useConnections";
 import { Connection } from "~/types/connections";
 
-const mockConnections : Connection []= [
-  {
-    id : 'asdjflkjl', 
-    name : 'Joe', 
-    imageUrl : 'https://i.pravatar.cc/300'
-  },
-  {
-    id : 'yellow', 
-    name : 'Yellow', 
-    imageUrl : 'https://i.pravatar.cc/300'
-  },
-]
 export default function Homepage() {
   const { connections } = useConnections();
   const [filteredConnections, setFilteredConnections] = useState<Connection[]>([])
   useEffect(() => {
-    setFilteredConnections(mockConnections)
-  }, [mockConnections])
+    setFilteredConnections(connections)
+  }, [connections])
 
   const onSearch = (searchTerm : string) => {
     if(!searchTerm || searchTerm.length == 0){
-      setFilteredConnections(mockConnections)
+      setFilteredConnections(connections)
       return
     }
     let searchResults = filteredConnections.filter((connection) => {
@@ -57,4 +45,7 @@ export default function Homepage() {
     </>
   );
 }
+
+
+
 

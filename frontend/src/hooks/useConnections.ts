@@ -21,6 +21,7 @@ export const useConnections = () => {
     refetch,
   } = useQuery({
     queryKey: ["connections"],
+    initialData : [],
     queryFn: getConnections,
   });
 
