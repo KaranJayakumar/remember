@@ -17,7 +17,7 @@ export default function AuthRoutesLayout() {
       router.replace('/(tabs)')
     }
     if (!isSignedIn) {
-      router.replace('/auth/sign-in')
+      router.replace('/(auth)/sign-in')
     }
   }, [isSignedIn, navigatorReady])
 

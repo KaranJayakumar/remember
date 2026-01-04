@@ -1,7 +1,6 @@
 import { PlusCircle } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { View } from "react-native";
-import { ConnectionForm } from "~/components/connection-form";
 import { AddConnection } from "~/components/ui/connections/add-connection";
 import { ConnectionPill } from "~/components/ui/connections/connection-pill";
 import { ContactSearchBar } from "~/components/ui/contact-search-bar";
