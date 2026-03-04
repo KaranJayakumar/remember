@@ -2,15 +2,15 @@ package main
 
 import (
 	"context"
-	"log"
-	"os"
 	"github.com/KaranJayakumar/remember/ent"
 	"github.com/KaranJayakumar/remember/ent/migrate"
 	"github.com/clerk/clerk-sdk-go/v2"
-	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -32,6 +32,10 @@ func setupServer() {
 		log.Fatalf("failed printing schema changes: %v", err)
 	}
 	clerk.SetKey(os.Getenv("CLERK_SECRET_KEY"))
+
+	// Initialize S3 client
+	s3Client := NewS3Client()
+
 	router := gin.Default()
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"*"}
@@ -57,8 +61,11 @@ func setupServer() {
 
 	router.PUT("/tags/:tag_id", AuthMiddleware(), UpdateTag(client))
 	router.DELETE("/tags/:tag_id", AuthMiddleware(), DeleteTag(client))
-	router.Run(":4444")
 
+	// Upload route
+	router.POST("/upload/url", AuthMiddleware(), GetPresignedUploadURL(s3Client))
+
+	router.Run(":4444")
 
 }
 

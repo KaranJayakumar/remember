@@ -21,12 +21,12 @@ type S3Client struct {
 func NewS3Client() *S3Client {
 	ctx := context.Background()
 
+	// Get configuration from environment variables with defaults for LocalStack
 	region := getEnv("AWS_REGION", "us-east-1")
 	endpoint := getEnv("S3_ENDPOINT", "http://localhost:4566")
 	bucket := getEnv("S3_BUCKET", "remember-profile-pictures")
 	accessKey := getEnv("AWS_ACCESS_KEY_ID", "test")
 	secretKey := getEnv("AWS_SECRET_ACCESS_KEY", "test")
-	forcePathStyle := getEnv("S3_FORCE_PATH_STYLE", "true") == "true"
 
 	// Load the AWS configuration with static credentials
 	cfg, err := config.LoadDefaultConfig(ctx,
@@ -44,7 +44,7 @@ func NewS3Client() *S3Client {
 	// Create S3 client with custom endpoint for LocalStack
 	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
 		o.BaseEndpoint = aws.String(endpoint)
-		o.UsePathStyle = forcePathStyle
+		o.UsePathStyle = true
 	})
 
 	s3Client := &S3Client{
