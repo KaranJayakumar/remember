@@ -12,8 +12,18 @@ services:
     depends_on:
       app_database:
         condition: service_healthy
+      localstack:
+        condition: service_healthy
     ports:
       - "4444:4444"
+    environment:
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - S3_ENDPOINT=http://localstack:4566
+      - S3_BUCKET=remember-profile-pictures
+      - S3_FORCE_PATH_STYLE=true
+  
   app_database:
     image: postgres:latest
     ports:
@@ -27,3 +37,25 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - DEBUG=1
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+    volumes:
+      - localstack-data:/var/lib/localstack
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  localstack-data:
