@@ -1,6 +1,16 @@
 # Remember - Personal Relationship Manager (PRM)
 
-A mobile application to help users remember details about friends and family.
+A mobile application to help users remember details about friends and family. Think of it as a **personal CRM** for your relationships - track notes, set reminders, organize with tags, and never forget important details about the people you care about.
+
+## Core Features
+
+- **Connections**: Add and manage people in your life with photos and details
+- **Notes**: Write timestamped notes about conversations, events, or important details
+- **Tags**: Categorize connections with custom tags (e.g., "colleague", "birthday: June 15", "allergies: peanuts")
+- **Reminders**: (Planned) Get notified when it's time to reach out to someone
+- **Workspaces**: Organize connections into groups (personal, work, etc.)
+
+---
 
 ## Tech Stack
 
@@ -43,8 +53,16 @@ frontend/src/
 ├── components/
 │   ├── auth/               # Sign-in/up forms, social auth
 │   ├── layout/             # Navigation components
-│   └── ui/                 # Reusable UI (button, card, input, etc.)
+│   ├── ui/                 # Reusable UI (button, card, input, etc.)
+│   │   ├── button.tsx
+│   │   ├── card.tsx
+│   │   ├── dialog.tsx
+│   │   ├── input.tsx
+│   │   └── avatar.tsx
+│   └── connections/        # Connection-specific components
 ├── hooks/                  # useConnections, useWorkspaces
+│   ├── useConnections.ts
+│   └── useWorkspaces.ts
 ├── lib/utils.ts            # cn() utility (clsx + tailwind-merge)
 └── types/connections.ts    # TypeScript interfaces
 ```
@@ -78,10 +96,14 @@ Workspace (1) ──< Connection (1) ──< Note
                       └──< Tag
 ```
 
-- **Workspace**: `id`, `name`, `owner_user_id` (Clerk user ID)
-- **Connection**: `id`, `workspace_id`, `name`, `image_url`
-- **Note**: `id`, `connection_id`, `content`
-- **Tag**: `id`, `connection_id`, `name`, `value`
+### Entity Details
+
+| Entity | Fields | Relationships |
+|--------|--------|---------------|
+| **Workspace** | `id` (UUID), `name`, `owner_user_id` (Clerk user ID) | Has many Connections |
+| **Connection** | `id` (UUID), `workspace_id`, `name`, `image_url` | Belongs to Workspace, has many Notes and Tags |
+| **Note** | `id` (UUID), `connection_id`, `content`, `created_at` | Belongs to Connection |
+| **Tag** | `id` (UUID), `connection_id`, `name` (unique), `value` | Belongs to Connection |
 
 ---
 
@@ -239,3 +261,14 @@ CLERK_SECRET_KEY=sk_test_...
 - **Auth flow**: Clerk handles JWT, middleware validates on every request
 - **Workspaces**: Auto-created on first request if none exist
 - **Ent queries**: Always use `.WithNotes().WithTags()` when fetching connections to eager-load relations
+
+---
+
+## Future Features (Roadmap)
+
+1. **Reminders System**: Schedule reminders to reach out to connections
+2. **Search & Filter**: Full-text search across notes and tags
+3. **Import/Export**: CSV import/export for connections
+4. **Analytics**: Track interaction frequency and relationship health
+5. **Push Notifications**: Local reminders for follow-ups
+6. **Rich Text Notes**: Support for formatting and images in notes
