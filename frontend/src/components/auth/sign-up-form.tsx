@@ -85,7 +85,7 @@ export function SignUpForm() {
         Already have an account?{' '}
         <Text
           className="text-primary underline"
-          onPress={() => router.navigate('/auth/sign-in')}
+          onPress={() => router.navigate('/(auth)/sign-in')}
         >
           Sign in
         </Text>

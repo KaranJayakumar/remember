@@ -39,7 +39,7 @@ export function SignInForm() {
   }
 
   const handleSignUpNav = () => {
-    router.navigate('/auth/sign-up')
+    router.navigate('/(auth)/sign-up')
   }
  
   return (

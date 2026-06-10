@@ -23,7 +23,7 @@ export default function AuthRoutesLayout() {
   }, [isSignedIn, navigatorReady])
 
   return (
-    <View className="flex-1 bg-slate-50 px-4">
+    <View className="flex-1 bg-slate-50 px-8">
       <Slot />
     </View>
   )
