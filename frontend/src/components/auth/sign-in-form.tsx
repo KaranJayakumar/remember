@@ -1,19 +1,10 @@
-import { SocialConnections } from '@/components/auth/social-connections';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { Text } from '@/components/ui/text';
 import * as React from 'react';
 import { useRouter } from 'expo-router';
-import { Pressable, type TextInput, View } from 'react-native';
+import { View } from 'react-native';
 import { isClerkAPIResponseError, useSignIn } from '@clerk/clerk-expo';
 import { useState } from 'react';
  
@@ -52,62 +43,56 @@ export function SignInForm() {
   }
  
   return (
-    <View className="gap-6">
-      <Card className="border-border/0 sm:border-border shadow-none sm:shadow-sm sm:shadow-black/5">
-        <CardHeader>
-          <CardTitle className="text-center text-xl sm:text-left">Sign in to Remember</CardTitle>
-          <CardDescription className="text-center sm:text-left">
-            Welcome back! Please sign in to continue
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="gap-6">
-          <View className="gap-6">
-            <View className="gap-1.5">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                placeholder="m@example.com"
-                keyboardType="email-address"
-                autoComplete="email"
-                autoCapitalize="none"
-                onChangeText={(text) => {setEmailAddress(text)}}
-                returnKeyType="next"
-                submitBehavior="submit"
-              />
-            </View>
-            <View className="gap-1.5">
-              <View className="flex-row items-center">
-                <Label htmlFor="password">Password</Label>
-              </View>
-              <Input
-                id="password"
-                secureTextEntry
-                returnKeyType="send"
-                onChangeText={(text) => {setPassword(text)}}
-              />
-            </View>
-            {
-              error && (
-                <Text className="text-center text-sm text-red-600">
-                  {error}
-                </Text>
-              )
-            }
-            <Button className="w-full" onPress={onSubmit}>
-              <Text>Continue</Text>
-            </Button>
-            <Text className="text-center text-sm jusify-center items-center">
-              Don&apos;t have an account?{' '}
-              <Text
-                onPress={() => {
-                  handleSignUpNav()
-                }}>
-                <Text className="text-sm">Sign up</Text>
-              </Text>
-            </Text>
+    <View className="w-full gap-6">
+      <View className="gap-1.5 items-center">
+        <Text className="text-4xl font-bold text-foreground text-center">Log in</Text>
+      </View>
+      <View className="gap-6">
+        <View className="gap-1.5">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            placeholder="m@example.com"
+            keyboardType="email-address"
+            autoComplete="email"
+            autoCapitalize="none"
+            onChangeText={(text) => {setEmailAddress(text)}}
+            returnKeyType="next"
+            submitBehavior="submit"
+          />
+        </View>
+        <View className="gap-1.5">
+          <View className="flex-row items-center">
+            <Label htmlFor="password">Password</Label>
           </View>
-        </CardContent>
-      </Card>
+          <Input
+            id="password"
+            secureTextEntry
+            returnKeyType="send"
+            onChangeText={(text) => {setPassword(text)}}
+          />
+        </View>
+        {
+          error && (
+            <Text className="text-center text-sm text-red-600">
+              {error}
+            </Text>
+          )
+        }
+        <Button className="w-full" onPress={onSubmit}>
+          <Text>Continue</Text>
+        </Button>
+        <Text className="text-center text-sm">
+          Don&apos;t have an account?{' '}
+          <Text
+            className="text-primary underline"
+            onPress={() => {
+              handleSignUpNav()
+            }}>
+            Sign up
+          </Text>
+        </Text>
+      </View>
     </View>
   );
 }
