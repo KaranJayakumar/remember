@@ -23,7 +23,7 @@ WebBrowser.maybeCompleteAuthSession();
 export default function Page() {
   useWarmUpBrowser();
   return (
-    <View className="flex-1 bg-slate-50 justify-center items-center px-4">
+    <View className="flex-1 justify-center items-center">
       <Logo />
       <SignInForm/>
     </View>
