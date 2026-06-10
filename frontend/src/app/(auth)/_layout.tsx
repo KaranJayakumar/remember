@@ -2,6 +2,7 @@ import { useAuth } from '@clerk/clerk-expo'
 import { Slot, useRouter } from 'expo-router'
 import { useEffect } from 'react'
 import { useRootNavigationState } from 'expo-router'
+import { View } from 'react-native'
 
 export default function AuthRoutesLayout() {
   const { isSignedIn } = useAuth()
@@ -21,5 +22,9 @@ export default function AuthRoutesLayout() {
     }
   }, [isSignedIn, navigatorReady])
 
-  return <Slot />
+  return (
+    <View className="flex-1 bg-slate-50 px-8">
+      <Slot />
+    </View>
+  )
 }

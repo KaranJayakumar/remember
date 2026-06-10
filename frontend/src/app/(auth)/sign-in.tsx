@@ -5,6 +5,7 @@ import { useSSO } from "@clerk/clerk-expo";
 import { View } from "react-native";
 import { Platform } from "react-native";
 import { SignInForm } from "~/components/auth/sign-in-form";
+import Logo from "~/components/brand/logo";
 
 export const useWarmUpBrowser = () => {
   useEffect(() => {
@@ -23,6 +24,7 @@ export default function Page() {
   useWarmUpBrowser();
   return (
     <View className="flex-1 justify-center items-center">
+      <Logo />
       <SignInForm/>
     </View>
   );
