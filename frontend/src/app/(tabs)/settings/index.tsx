@@ -43,13 +43,14 @@ export default function Settings() {
         <View className="w-full">
           <ContactSearchBar onChange={onSearch}/>
           <View className="mt-4">
-            {
-              filteredConnections.map((connection, index) => {
-                return (
-                  <ConnectionPill key={index} name={connection.name} imageUrl={connection.imageUrl}/>
-                )
-              })
-            }
+            {filteredConnections.map((connection) => (
+              <ConnectionPill
+                key={connection.id}
+                id={connection.id}
+                name={connection.name}
+                imageUrl={connection.imageUrl}
+              />
+            ))}
           </View>
         </View>
       </View>

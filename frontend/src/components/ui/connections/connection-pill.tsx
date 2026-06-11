@@ -1,25 +1,32 @@
-import { Text, View } from "react-native"
-import { Avatar, AvatarFallback, AvatarImage } from "../avatar"
+import { UserCircle } from "lucide-react-native";
+import { Pressable, Text, View } from "react-native";
+import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 
-interface Props{
-  name : string, 
-  imageUrl : string,
+interface Props {
+  id: string;
+  name: string;
+  imageUrl?: string | null;
+  onPress?: (id: string) => void;
 }
-export const ConnectionPill = ({name, imageUrl} : Props) => {
+
+export const ConnectionPill = ({ id, name, imageUrl, onPress }: Props) => {
   return (
-    <View className="border rounded-2xl flex flex-row items-center h-14 mb-4">
+    <Pressable
+      onPress={() => onPress?.(id)}
+      className="border rounded-2xl flex flex-row items-center h-14 mb-4 active:bg-muted"
+    >
       <View className="ml-2 mr-4">
         <Avatar alt="Connection Avatar">
-          <AvatarImage source={{ uri: imageUrl }} />
+          {imageUrl ? (
+            <AvatarImage source={{ uri: imageUrl }} />
+          ) : null}
           <AvatarFallback>
-            <Text>{name} avatar</Text>
+            <UserCircle size={20} className="text-muted-foreground" />
           </AvatarFallback>
         </Avatar>
       </View>
-      <Text>
-        {name}
-      </Text>
-    </View>
-  )
-}
+      <Text className="text-foreground font-medium">{name}</Text>
+    </Pressable>
+  );
+};
 
