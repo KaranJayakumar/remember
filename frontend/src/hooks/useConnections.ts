@@ -5,13 +5,12 @@ import { useWorkspace } from "./useWorkspaces";
 
 export const useConnections = () => {
   const { getToken } = useAuth();
-    const { workspace } = useWorkspace()
+  const { workspace } = useWorkspace();
 
   const getConnections = async () => {
     const token = await getToken();
     if (!token) throw new Error("No session token available");
-    const {workspace} = useWorkspace()
-    return getConnectionsApi({token, workspaceId : workspace?.id || ''})
+    return getConnectionsApi({ token, workspaceId: workspace?.id || "" });
   };
 
   const {
