@@ -54,7 +54,7 @@ export default function ConnectionDetail() {
 
   return (
     <ScrollView className="flex-1 bg-background">
-      <View className="px-6 pt-16 pb-10 gap-6">
+      <View className="px-6 pt-4 pb-10 gap-6">
         <Button
           variant="ghost"
           size="sm"
