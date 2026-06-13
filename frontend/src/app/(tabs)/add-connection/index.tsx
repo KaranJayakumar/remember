@@ -1,5 +1,5 @@
-import { CircleUser, Plus, Trash2 } from "lucide-react-native";
-import { ActivityIndicator, Alert, ScrollView, View } from "react-native";
+import { CircleUser, Plus, Trash2, Camera } from "lucide-react-native";
+import { ActivityIndicator, Alert, Image, ScrollView, View } from "react-native";
 import { useForm } from '@tanstack/react-form';
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
@@ -8,16 +8,18 @@ import { Label } from "~/components/ui/label";
 import { Text } from "~/components/ui/text";
 import { useConnections } from "~/hooks/useConnections";
 import { useNotes } from "~/hooks/useNotes";
+import * as ImagePicker from 'expo-image-picker';
 
 export default function AddConnection() {
   const queryClient = useQueryClient();
-  const { createConnection } = useConnections();
+  const { createConnection, uploadImage } = useConnections();
   const { createNote } = useNotes();
 
   const form = useForm({
     defaultValues: {
       firstName: '',
       lastName: '',
+      imageUri: null as string | null,
       notes: ['']
     },
     onSubmit: async ({ value }) => {
@@ -28,7 +30,12 @@ export default function AddConnection() {
       }
 
       try {
-        const connection = await createConnection(name);
+        let imageUrl: string | undefined;
+        if (value.imageUri) {
+          imageUrl = await uploadImage(value.imageUri, 'image/jpeg');
+        }
+
+        const connection = await createConnection(name, undefined, imageUrl);
         const connectionId = connection.id;
 
         const validNotes = value.notes.filter((n) => n.trim().length > 0);
@@ -45,13 +52,60 @@ export default function AddConnection() {
     }
   });
 
+  const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert('Permission required', 'Please allow access to your photo library to upload a profile picture.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      form.setFieldValue('imageUri', result.assets[0].uri);
+    }
+  };
+
   return (
     <ScrollView className="flex-1 bg-background" contentContainerClassName="pb-10">
       <View className="flex-1 flex-col items-center px-6 pt-16">
         <View className="mb-8 items-center justify-center">
-          <View className="h-24 w-24 rounded-full bg-secondary items-center justify-center">
-            <CircleUser size={64} className="text-muted-foreground" strokeWidth={1.5} />
-          </View>
+          <form.Field
+            name="imageUri"
+            children={(field) => (
+              <View className="items-center">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onPress={pickImage}
+                  className="h-24 w-24 rounded-full p-0 overflow-hidden"
+                >
+                  {field.state.value ? (
+                    <Image
+                      source={{ uri: field.state.value }}
+                      className="h-24 w-24 rounded-full"
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View className="h-24 w-24 rounded-full bg-secondary items-center justify-center">
+                      <CircleUser size={64} className="text-muted-foreground" strokeWidth={1.5} />
+                    </View>
+                  )}
+                </Button>
+                <View className="flex-row items-center gap-2 mt-3">
+                  <Camera size={16} className="text-muted-foreground" />
+                  <Text className="text-muted-foreground text-sm">
+                    {field.state.value ? 'Change photo' : 'Add photo'}
+                  </Text>
+                </View>
+              </View>
+            )}
+          />
           <Text className="mt-4 text-2xl font-bold">New Connection</Text>
           <Text className="text-muted-foreground">Add someone you want to remember</Text>
         </View>

@@ -8,6 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -27,11 +28,17 @@ type PresignedURLResponse struct {
 // GetPresignedUploadURL generates a presigned URL for direct S3 upload
 func GetPresignedUploadURL(s3Client *S3Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userID, exists := c.Get("userID")
+		claims, exists := c.Get("claims")
 		if !exists {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 			return
 		}
+		sessionClaims, ok := claims.(*clerk.SessionClaims)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+		userID := sessionClaims.Subject
 
 		var body PresignedURLRequest
 		if err := c.ShouldBindJSON(&body); err != nil {
