@@ -49,9 +49,8 @@ func GetPresignedUploadURL(s3Client *S3Client) gin.HandlerFunc {
 		// Generate unique key for the image
 		key := fmt.Sprintf("profile-pictures/%s/%s", userID, uuid.New().String())
 
-		// Generate presigned URL for PUT operation
-		presignClient := s3.NewPresignClient(s3Client.Client)
-		presignedReq, err := presignClient.PresignPutObject(context.Background(), &s3.PutObjectInput{
+		// Generate presigned URL for PUT operation using the public-facing endpoint
+		presignedReq, err := s3Client.PresignClient.PresignPutObject(context.Background(), &s3.PutObjectInput{
 			Bucket:      aws.String(s3Client.Bucket),
 			Key:         aws.String(key),
 			ContentType: aws.String(body.ContentType),
@@ -64,7 +63,7 @@ func GetPresignedUploadURL(s3Client *S3Client) gin.HandlerFunc {
 
 		// Construct the public URL for the file (how it will be accessible)
 		publicURL := fmt.Sprintf("%s/%s/%s",
-			*s3Client.Client.Options().BaseEndpoint,
+			s3Client.PublicEndpoint,
 			s3Client.Bucket,
 			key)
 
