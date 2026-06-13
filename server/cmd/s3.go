@@ -17,14 +17,12 @@ type S3Client struct {
 	Bucket string
 }
 
-// NewS3Client creates a new S3 client configured for LocalStack
 func NewS3Client() *S3Client {
 	ctx := context.Background()
 
-	// Get configuration from environment variables with defaults for LocalStack
 	region := getEnv("AWS_REGION", "us-east-1")
-	endpoint := getEnv("S3_ENDPOINT", "http://localhost:4566")
-	bucket := getEnv("S3_BUCKET", "remember-profile-pictures")
+	endpoint := getEnv("S3_ENDPOINT", "http://aws:4566")
+	bucket := getEnv("S3_BUCKET", "ivanhoe-remember-prod")
 	accessKey := getEnv("AWS_ACCESS_KEY_ID", "test")
 	secretKey := getEnv("AWS_SECRET_ACCESS_KEY", "test")
 
@@ -41,7 +39,6 @@ func NewS3Client() *S3Client {
 		log.Fatalf("Unable to load SDK config: %v", err)
 	}
 
-	// Create S3 client with custom endpoint for LocalStack
 	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
 		o.BaseEndpoint = aws.String(endpoint)
 		o.UsePathStyle = true

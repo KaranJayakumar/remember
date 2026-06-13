@@ -13,13 +13,6 @@ services:
       - aws
     ports:
       - "4444:4444"
-    environment:
-      - AWS_REGION=us-east-1
-      - AWS_ACCESS_KEY_ID=test
-      - AWS_SECRET_ACCESS_KEY=test
-      - S3_ENDPOINT=http://localstack:4566
-      - S3_BUCKET=remember-profile-pictures
-      - S3_FORCE_PATH_STYLE=true
   aws:
     image: floci/floci:latest-aws
     ports:
