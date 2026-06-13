@@ -7,7 +7,7 @@ import (
 	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 	_ "github.com/lib/pq"
 	"entgo.io/ent/dialect"
 	"log"
