@@ -2,7 +2,7 @@
   "expo": {
     "name": "frontend",
     "scheme": "frontend",
-    "slug": "frontend",
+    "slug": "remember",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/icon.png",
@@ -30,6 +30,13 @@
       "expo-router",
       "expo-web-browser",
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6580941c-8eec-41e9-80c3-e4ac582be0c7"
+      }
+    },
+    "owner": "karanjaykumar"
   }
 }
