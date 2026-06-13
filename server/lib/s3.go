@@ -23,7 +23,7 @@ func NewS3Client() *S3Client {
 
 	region := getEnv("AWS_REGION", "us-east-1")
 	endpoint := getEnv("S3_ENDPOINT", "http://localhost:4566")
-	bucket := getEnv("S3_BUCKET", "remember-profile-pictures")
+	bucket := getEnv("S3_BUCKET", "ivanhoe-remember-prod")
 	accessKey := getEnv("AWS_ACCESS_KEY_ID", "test")
 	secretKey := getEnv("AWS_SECRET_ACCESS_KEY", "test")
 	forcePathStyle := getEnv("S3_FORCE_PATH_STYLE", "true") == "true"

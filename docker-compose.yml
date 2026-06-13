@@ -9,6 +9,8 @@ services:
       - ./server:/app      
     env_file:
       - ./server/.env
+    depends_on:
+      - aws
     ports:
       - "4444:4444"
     environment:
@@ -18,3 +20,9 @@ services:
       - S3_ENDPOINT=http://localstack:4566
       - S3_BUCKET=remember-profile-pictures
       - S3_FORCE_PATH_STYLE=true
+  aws:
+    image: floci/floci:latest-aws
+    ports:
+      - "5555:4566"
+    environment:
+      - SERVICES=s3
