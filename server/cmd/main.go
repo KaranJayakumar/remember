@@ -7,7 +7,9 @@ import (
 	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	_ "github.com/mattn/go-sqlite3"
 	_ "github.com/lib/pq"
+	"entgo.io/ent/dialect"
 	"log"
 	"net/http"
 	"os"
@@ -19,7 +21,7 @@ func main() {
 
 func setupServer() {
 
-	client, err := ent.Open("postgres", os.Getenv("POSTGRES_ENT_CONN_STRING"))
+	client, err := ent.Open(dialect.SQLite, "file:ent?mode=memory&cache=shared&_fk=1")
 
 	if err != nil {
 		log.Fatalf("failed connecting to postgres: %v", err)
