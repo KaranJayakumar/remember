@@ -9,9 +9,6 @@ services:
       - ./server:/app      
     env_file:
       - ./server/.env
-    depends_on:
-      app_database:
-        condition: service_healthy
     ports:
       - "4444:4444"
     environment:
@@ -21,17 +18,3 @@ services:
       - S3_ENDPOINT=http://localstack:4566
       - S3_BUCKET=remember-profile-pictures
       - S3_FORCE_PATH_STYLE=true
-  
-  app_database:
-    image: postgres:latest
-    ports:
-      - "5555:5432"
-    environment:
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: remember
-      POSTGRES_USER: user 
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d remember"]
-      interval: 5s
-      timeout: 5s
-      retries: 5

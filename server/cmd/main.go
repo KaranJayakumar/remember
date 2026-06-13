@@ -13,15 +13,43 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"database/sql"
+	"database/sql/driver"
+	"modernc.org/sqlite"
 )
 
 func main() {
 	setupServer()
 }
 
-func setupServer() {
+type sqlite3Driver struct {
+	*sqlite.Driver
+}
 
-	client, err := ent.Open(dialect.SQLite, "file:ent?mode=memory&cache=shared&_fk=1")
+type sqlite3DriverConn interface {
+	Exec(string, []driver.Value) (driver.Result, error)
+}
+
+func (d sqlite3Driver) Open(name string) (conn driver.Conn, err error) {
+	conn, err = d.Driver.Open(name)
+	if err != nil {
+		return
+	}
+	_, err = conn.(sqlite3DriverConn).Exec("PRAGMA foreign_keys = ON;", nil)
+	if err != nil {
+		_ = conn.Close()
+	}
+	return
+}
+
+func initNativeGolangDBDriver() {
+	sql.Register("sqlite3", sqlite3Driver{Driver: &sqlite.Driver{}})
+}
+
+func setupServer() {
+	initNativeGolangDBDriver()
+
+	client, err := ent.Open(dialect.SQLite, "file:ent.db?cache=shared&_fk=1")
 
 	if err != nil {
 		log.Fatalf("failed connecting to postgres: %v", err)

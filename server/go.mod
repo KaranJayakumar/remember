@@ -11,6 +11,7 @@ require (
 	github.com/clerk/clerk-sdk-go/v2 v2.3.1
 	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-gonic/gin v1.11.0
+	modernc.org/sqlite v1.52.0
 )
 
 require (
@@ -65,7 +66,6 @@ require (
 	modernc.org/libc v1.72.3 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
-	modernc.org/sqlite v1.52.0 // indirect
 )
 
 require (
