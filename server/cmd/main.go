@@ -49,7 +49,7 @@ func initNativeGolangDBDriver() {
 func setupServer() {
 	initNativeGolangDBDriver()
 
-	client, err := ent.Open(dialect.SQLite, "file:ent.db?cache=shared&_fk=1")
+	client, err := ent.Open(dialect.SQLite, "file:data/ent.db?cache=shared&_fk=1")
 
 	if err != nil {
 		log.Fatalf("failed connecting to postgres: %v", err)
