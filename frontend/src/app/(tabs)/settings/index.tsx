@@ -1,59 +1,43 @@
-import { useEffect, useState } from "react";
-import { View } from "react-native";
-import { AddConnection } from "~/components/ui/connections/add-connection";
-import { ConnectionPill } from "~/components/ui/connections/connection-pill";
-import { ContactSearchBar } from "~/components/ui/contact-search-bar";
-import { useConnections } from "~/hooks/useConnections";
-import { Connection } from "~/types/connections";
-
-const mockConnections : Connection []= [
-  {
-    id : 'asdjflkjl', 
-    name : 'Joe', 
-    imageUrl : 'https://i.pravatar.cc/300'
-  },
-  {
-    id : 'yellow', 
-    name : 'Yellow', 
-    imageUrl : 'https://i.pravatar.cc/300'
-  },
-]
+import { useAuth } from "@clerk/clerk-expo";
+import { View, Pressable, Alert } from "react-native";
+import { Text } from "~/components/ui/text";
+import { LogOut } from "lucide-react-native";
 
 export default function Settings() {
-  const { connections } = useConnections();
-  const [filteredConnections, setFilteredConnections] = useState<Connection[]>([])
-  useEffect(() => {
-    setFilteredConnections(mockConnections)
-  }, [mockConnections])
+  const { signOut } = useAuth();
 
-  const onSearch = (searchTerm : string) => {
-    if(!searchTerm || searchTerm.length == 0){
-      setFilteredConnections(mockConnections)
-      return
-    }
-    let searchResults = filteredConnections.filter((connection) => {
-      return connection.name.toLowerCase().includes(searchTerm)
-    })
-    setFilteredConnections(searchResults)
-  }
+  const handleSignOut = () => {
+    Alert.alert(
+      "Sign Out",
+      "Are you sure you want to sign out?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Sign Out",
+          style: "destructive",
+          onPress: () => signOut(),
+        },
+      ]
+    );
+  };
 
   return (
-    <>
-      <View className="flex-1 flex-col items-center px-6 pt-16">
-        <View className="w-full">
-          <ContactSearchBar onChange={onSearch}/>
-          <View className="mt-4">
-            {filteredConnections.map((connection) => (
-              <ConnectionPill
-                key={connection.id}
-                id={connection.id}
-                name={connection.name}
-                imageUrl={connection.imageUrl}
-              />
-            ))}
-          </View>
+    <View className="flex-1 bg-background px-6 pt-16">
+      <View className="w-full gap-6">
+        <Text className="text-3xl font-bold text-foreground">Account</Text>
+
+        <View className="bg-card rounded-xl border overflow-hidden">
+          <Pressable
+            onPress={handleSignOut}
+            className="flex-row items-center justify-center py-3.5 active:bg-muted"
+          >
+            <LogOut size={18} className="text-red-600 mr-2" />
+            <Text className="text-base font-medium text-red-600">
+              Sign Out
+            </Text>
+          </Pressable>
         </View>
       </View>
-    </>
+    </View>
   );
 }
