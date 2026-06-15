@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/KaranJayakumar/remember/ent"
@@ -81,7 +82,8 @@ func CreateConnection(client *ent.Client) gin.HandlerFunc {
 
 		connection, err := builder.Save(c.Request.Context())
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "could not create connection"})
+			log.Printf("CreateConnection error: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "could not create connection: " + err.Error()})
 			return
 		}
 

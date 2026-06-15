@@ -233,7 +233,10 @@ EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
 ```env
 POSTGRES_ENT_CONN_STRING=postgres://user:pass@localhost:5555/remember?sslmode=disable
 CLERK_SECRET_KEY=sk_test_...
+S3_PUBLIC_ENDPOINT=http://localhost:4566
 ```
+
+> **S3_UPLOAD**: The backend uses `S3_ENDPOINT` for internal S3 API calls (e.g. `http://aws:4566` inside Docker) and `S3_PUBLIC_ENDPOINT` for presigned URLs returned to the frontend. Set `S3_PUBLIC_ENDPOINT` to a host:port the frontend can reach from outside Docker.
 
 ---
 

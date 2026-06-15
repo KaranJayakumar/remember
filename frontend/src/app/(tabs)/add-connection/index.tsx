@@ -1,4 +1,4 @@
-import { CircleUser, Plus, Trash2 } from "lucide-react-native";
+import { Plus, Trash2 } from "lucide-react-native";
 import { ActivityIndicator, Alert, ScrollView, View } from "react-native";
 import { useForm } from '@tanstack/react-form';
 import { useQueryClient } from "@tanstack/react-query";
@@ -6,18 +6,20 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Text } from "~/components/ui/text";
+import { ChooseProfileImage } from "~/components/ui/choose-profile-image";
 import { useConnections } from "~/hooks/useConnections";
 import { useNotes } from "~/hooks/useNotes";
 
 export default function AddConnection() {
   const queryClient = useQueryClient();
-  const { createConnection } = useConnections();
+  const { createConnection, uploadImage } = useConnections();
   const { createNote } = useNotes();
 
   const form = useForm({
     defaultValues: {
       firstName: '',
       lastName: '',
+      imageUri: null as string | null,
       notes: ['']
     },
     onSubmit: async ({ value }) => {
@@ -28,7 +30,12 @@ export default function AddConnection() {
       }
 
       try {
-        const connection = await createConnection(name);
+        let imageUrl: string | undefined;
+        if (value.imageUri) {
+          imageUrl = await uploadImage(value.imageUri, 'image/jpeg');
+        }
+
+        const connection = await createConnection(name, undefined, imageUrl);
         const connectionId = connection.id;
 
         const validNotes = value.notes.filter((n) => n.trim().length > 0);
@@ -49,9 +56,16 @@ export default function AddConnection() {
     <ScrollView className="flex-1 bg-background" contentContainerClassName="pb-10">
       <View className="flex-1 flex-col items-center px-6 pt-16">
         <View className="mb-8 items-center justify-center">
-          <View className="h-24 w-24 rounded-full bg-secondary items-center justify-center">
-            <CircleUser size={64} className="text-muted-foreground" strokeWidth={1.5} />
-          </View>
+          <form.Field
+            name="imageUri"
+            children={(field) => (
+              <ChooseProfileImage
+                imageUri={field.state.value}
+                onImageSelected={(uri) => form.setFieldValue('imageUri', uri)}
+                size={96}
+              />
+            )}
+          />
           <Text className="mt-4 text-2xl font-bold">New Connection</Text>
           <Text className="text-muted-foreground">Add someone you want to remember</Text>
         </View>

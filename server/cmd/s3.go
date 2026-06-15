@@ -13,8 +13,10 @@ import (
 
 // S3Client wraps the AWS S3 client with configuration
 type S3Client struct {
-	Client *s3.Client
-	Bucket string
+	Client         *s3.Client
+	PresignClient  *s3.PresignClient
+	Bucket         string
+	PublicEndpoint string
 }
 
 func NewS3Client() *S3Client {
@@ -22,6 +24,7 @@ func NewS3Client() *S3Client {
 
 	region := getEnv("AWS_REGION", "us-east-1")
 	endpoint := getEnv("S3_ENDPOINT", "http://aws:4566")
+	publicEndpoint := "http://localhost:5555"
 	bucket := getEnv("S3_BUCKET", "ivanhoe-remember-prod")
 	accessKey := getEnv("AWS_ACCESS_KEY_ID", "test")
 	secretKey := getEnv("AWS_SECRET_ACCESS_KEY", "test")
@@ -44,9 +47,18 @@ func NewS3Client() *S3Client {
 		o.UsePathStyle = true
 	})
 
+	// Create a separate presign client using the public endpoint
+	// so the presigned URLs are accessible from outside Docker
+	presignClient := s3.NewPresignClient(s3.NewFromConfig(cfg, func(o *s3.Options) {
+		o.BaseEndpoint = aws.String(publicEndpoint)
+		o.UsePathStyle = true
+	}))
+
 	s3Client := &S3Client{
-		Client: client,
-		Bucket: bucket,
+		Client:         client,
+		PresignClient:  presignClient,
+		Bucket:         bucket,
+		PublicEndpoint: publicEndpoint,
 	}
 
 	// Ensure bucket exists
