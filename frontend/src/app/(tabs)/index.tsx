@@ -39,7 +39,7 @@ export default function Homepage() {
               key={connection.id}
               id={connection.id}
               name={connection.name}
-              imageUrl={connection.imageUrl}
+              image_url={connection.image_url}
               onPress={handleConnectionPress}
             />
           ))}

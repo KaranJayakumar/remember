@@ -1,7 +1,7 @@
 export interface Connection {
   id: string;
   name: string;
-  imageUrl: string;
+  image_url: string;
   tags?: Tag[];
   notes?: Note[];
 }
