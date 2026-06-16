@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-expo";
-import { createNoteApi } from "~/api/api";
+import { createNoteApi, getNotesApi } from "~/api/notes";
 
 export const useNotes = () => {
   const { getToken } = useAuth();
@@ -19,12 +19,19 @@ export const useNotes = () => {
     },
   });
 
+  const getNotes = async (connectionId: string) => {
+    const token = await getToken();
+    if (!token) throw new Error("Missing token");
+    return getNotesApi({ token, connectionId });
+  };
+
   const createNote = async (connectionId: string, content: string) => {
     return createNoteMutation.mutateAsync({ connectionId, content });
   };
 
   return {
     createNote,
+    getNotes,
     isPending: createNoteMutation.isPending,
   };
 };

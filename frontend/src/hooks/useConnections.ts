@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-expo";
-import { createConnectionApi, getConnectionsApi, getPresignedUploadUrlApi, uploadToPresignedUrl } from "~/api/api";
+import { createConnectionApi, deleteConnectionApi, getConnectionsApi } from "~/api/connections";
+import { getPresignedUploadUrlApi, uploadToPresignedUrl } from "~/api/upload";
 import { useWorkspace } from "./useWorkspaces";
 
 export const useConnections = () => {
@@ -20,7 +21,7 @@ export const useConnections = () => {
     refetch,
   } = useQuery({
     queryKey: ["connections"],
-    initialData : [],
+    initialData: [],
     queryFn: getConnections,
   });
 
@@ -36,13 +37,24 @@ export const useConnections = () => {
     }) => {
       const token = await getToken();
       if (!token) throw new Error("Missing token");
+      return createConnectionApi({ token, name, tags, imageUrl, workspaceId: workspace?.id || "" });
+    },
+  });
 
-      return createConnectionApi({ token, name, tags, imageUrl, workspaceId : workspace?.id || ''});
+  const deleteConnectionMutation = useMutation({
+    mutationFn: async ({ connectionId }: { connectionId: string }) => {
+      const token = await getToken();
+      if (!token) throw new Error("Missing token");
+      return deleteConnectionApi({ token, connectionId });
     },
   });
 
   const createConnection = async (name: string, tags?: Record<string, string>, imageUrl?: string) => {
     return createConnectionMutation.mutateAsync({ name, tags, imageUrl });
+  };
+
+  const deleteConnection = async (connectionId: string) => {
+    return deleteConnectionMutation.mutateAsync({ connectionId });
   };
 
   const uploadImage = async (fileUri: string, contentType: string) => {
@@ -68,6 +80,7 @@ export const useConnections = () => {
     connections,
     isLoading,
     createConnection,
+    deleteConnection,
     uploadImage,
     error,
   };

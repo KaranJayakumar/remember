@@ -79,6 +79,7 @@ func setupServer() {
 
 	router.GET("/workspaces/:workspace_id/connections", AuthMiddleware(), GetConnections(client))
 	router.POST("/workspaces/:workspace_id/connections", AuthMiddleware(), CreateConnection(client))
+	router.DELETE("/connections/:connection_id", AuthMiddleware(), DeleteConnection(client))
 
 	router.POST("/connections/:connection_id/notes", AuthMiddleware(), CreateNote(client))
 	router.GET("/connections/:connection_id/notes", AuthMiddleware(), GetNotes(client))

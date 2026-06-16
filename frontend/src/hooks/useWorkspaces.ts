@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-expo";
-import { listWorkspacesApi } from "~/api/api";
+import { listWorkspacesApi } from "~/api/workspaces";
 
 export const useWorkspace = () => {
   const { getToken } = useAuth();
@@ -31,4 +31,3 @@ export const useWorkspace = () => {
     error,
   };
 };
-
