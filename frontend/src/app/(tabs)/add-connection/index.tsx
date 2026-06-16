@@ -1,5 +1,6 @@
 import { Plus, Trash2 } from "lucide-react-native";
 import { ActivityIndicator, Alert, ScrollView, View } from "react-native";
+import { useRouter } from "expo-router";
 import { useForm } from '@tanstack/react-form';
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
@@ -11,6 +12,7 @@ import { useConnections } from "~/hooks/useConnections";
 import { useNotes } from "~/hooks/useNotes";
 
 export default function AddConnection() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { createConnection, uploadImage } = useConnections();
   const { createNote } = useNotes();
@@ -44,8 +46,15 @@ export default function AddConnection() {
         }
 
         await queryClient.invalidateQueries({ queryKey: ["connections"] });
-        Alert.alert('Success', 'Connection created!');
-        form.reset();
+        Alert.alert('Success', 'Connection created!', [
+          {
+            text: 'OK',
+            onPress: () => {
+              form.reset();
+              router.push(`/connection/${connectionId}`);
+            },
+          },
+        ]);
       } catch (err: any) {
         Alert.alert('Error', err.message || 'Failed to create connection');
       }
