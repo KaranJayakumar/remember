@@ -1,22 +1,23 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, ScrollView, View } from "react-native";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useConnections } from "~/hooks/useConnections";
 import { useNotes } from "~/hooks/useNotes";
+import { useTags } from "~/hooks/useTags";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Text } from "~/components/ui/text";
 import { ProfileImage } from "~/components/ui/profile-image";
-import { ChevronLeft, Trash2 } from "lucide-react-native";
+import { ChevronLeft, Trash2, X, Plus } from "lucide-react-native";
 
 export default function ConnectionDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const queryClient = useQueryClient();
-  const { connections, isLoading: connectionsLoading, deleteConnection } = useConnections();
+  const { connections, isLoading: connectionsLoading, deleteConnection, refetch } = useConnections();
   const { createNote, getNotes } = useNotes();
+  const { createTag, deleteTag, getTags } = useTags();
 
   const connection = connections.find((c) => c.id === id);
 
@@ -29,20 +30,21 @@ export default function ConnectionDetail() {
     enabled: !!id,
   });
 
+  const {
+    data: tags,
+    isLoading: tagsLoading,
+  } = useQuery({
+    queryKey: ["tags", id],
+    queryFn: () => getTags(id),
+    enabled: !!id,
+  });
+
   const [note, setNote] = useState("");
+  const [tagName, setTagName] = useState("");
+  const [tagValue, setTagValue] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    if (notes && notes.length > 0) {
-      queryClient.setQueryData(["connections"], (old: any) => {
-        if (!old) return old;
-        return old.map((c: any) =>
-          c.id === id ? { ...c, edges: { ...c.edges, notes } } : c
-        );
-      });
-    }
-  }, [notes, id, queryClient]);
+  const [isAddingTag, setIsAddingTag] = useState(false);
 
   if (connectionsLoading) {
     return (
@@ -69,13 +71,47 @@ export default function ConnectionDetail() {
     try {
       await createNote(id, note.trim());
       setNote("");
-      await queryClient.invalidateQueries({ queryKey: ["notes", id] });
       Alert.alert("Success", "Note added");
     } catch (err: any) {
       Alert.alert("Error", err.message || "Failed to add note");
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleAddTag = async () => {
+    if (!tagName.trim() || !tagValue.trim()) {
+      Alert.alert("Error", "Please enter both a tag name and value");
+      return;
+    }
+    setIsAddingTag(true);
+    try {
+      await createTag(id, tagName.trim(), tagValue.trim());
+      setTagName("");
+      setTagValue("");
+      Alert.alert("Success", "Tag added");
+    } catch (err: any) {
+      Alert.alert("Error", err.message || "Failed to add tag");
+    } finally {
+      setIsAddingTag(false);
+    }
+  };
+
+  const handleRemoveTag = (tagId: string) => {
+    Alert.alert("Remove Tag", "Are you sure you want to remove this tag?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Remove",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await deleteTag(tagId);
+          } catch (err: any) {
+            Alert.alert("Error", err.message || "Failed to remove tag");
+          }
+        },
+      },
+    ]);
   };
 
   const handleDelete = async () => {
@@ -91,7 +127,7 @@ export default function ConnectionDetail() {
             setIsDeleting(true);
             try {
               await deleteConnection(id);
-              await queryClient.invalidateQueries({ queryKey: ["connections"] });
+              await refetch();
               router.back();
             } catch (err: any) {
               Alert.alert("Error", err.message || "Failed to delete connection");
@@ -104,7 +140,7 @@ export default function ConnectionDetail() {
   };
 
   const allNotes = notes || connection.edges?.notes || [];
-  const tags = connection.edges?.tags || [];
+  const allTags = tags || connection.edges?.tags || [];
 
   return (
     <ScrollView className="flex-1 bg-background">
@@ -124,23 +160,62 @@ export default function ConnectionDetail() {
           <Text className="text-3xl font-bold text-foreground">{connection.name}</Text>
         </View>
 
-        {tags.length > 0 && (
-          <View className="gap-2">
-            <Label>Tags</Label>
+        <View className="gap-4">
+          <Label>Tags</Label>
+          {tagsLoading ? (
+            <ActivityIndicator />
+          ) : allTags.length > 0 ? (
             <View className="flex-row flex-wrap gap-2">
-              {tags.map((tag, i) => (
+              {allTags.map((tag) => (
                 <View
-                  key={i}
-                  className="px-3 py-1 rounded-full bg-secondary"
+                  key={tag.id}
+                  className="flex-row items-center gap-1 px-3 py-1 rounded-full bg-secondary"
                 >
                   <Text className="text-xs text-secondary-foreground">
                     {tag.name}: {tag.value}
                   </Text>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onPress={() => handleRemoveTag(tag.id)}
+                    className="h-5 w-5 p-0"
+                  >
+                    <X size={12} className="text-secondary-foreground" />
+                  </Button>
                 </View>
               ))}
             </View>
+          ) : (
+            <Text className="text-muted-foreground text-sm">No tags yet</Text>
+          )}
+
+          <View className="flex-row gap-2">
+            <Input
+              placeholder="Tag name"
+              value={tagName}
+              onChangeText={setTagName}
+              className="flex-1"
+            />
+            <Input
+              placeholder="Tag value"
+              value={tagValue}
+              onChangeText={setTagValue}
+              className="flex-1"
+            />
+            <Button
+              variant="outline"
+              size="icon"
+              onPress={handleAddTag}
+              disabled={isAddingTag}
+            >
+              {isAddingTag ? (
+                <ActivityIndicator size="small" />
+              ) : (
+                <Plus size={16} className="text-foreground" />
+              )}
+            </Button>
           </View>
-        )}
+        </View>
 
         <View className="gap-4">
           <Label>Notes</Label>
