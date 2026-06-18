@@ -1,4 +1,4 @@
-package main
+package middleware
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func AuthMiddleware() gin.HandlerFunc {
+func ClerkAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
