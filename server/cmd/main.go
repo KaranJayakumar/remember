@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	db.InitialiseDatabase()
+	db.Init()
 	router := gin.Default()
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"*"}

@@ -9,11 +9,10 @@ import (
 
 	_ "modernc.org/sqlite"
 )
+const DatabaseFilePath = "data/remember.db"
 
-func Init(dbPath string) *sql.DB {
-	if dbPath == "" {
-		dbPath = "data/remember.db"
-	}
+func Init() *sql.DB {
+	dbPath := DatabaseFilePath
 
 	// Ensure directory exists
 	dir := filepath.Dir(dbPath)
