@@ -1,4 +1,6 @@
 package main
+	"github.com/KaranJayakumar/remember/ent/note"
+	"github.com/KaranJayakumar/remember/ent/tag"
 
 import (
 	"context"
