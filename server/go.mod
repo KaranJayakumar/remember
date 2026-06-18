@@ -3,7 +3,6 @@ module github.com/KaranJayakumar/remember
 go 1.25.0
 
 require (
-	entgo.io/ent v0.14.4
 	github.com/aws/aws-sdk-go-v2 v1.41.3
 	github.com/aws/aws-sdk-go-v2/config v1.32.11
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.11

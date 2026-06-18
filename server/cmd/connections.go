@@ -4,10 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/KaranJayakumar/remember/ent"
 	"github.com/KaranJayakumar/remember/ent/connection"
-	"github.com/KaranJayakumar/remember/ent/note"
-	"github.com/KaranJayakumar/remember/ent/tag"
 	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
