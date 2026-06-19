@@ -30,8 +30,6 @@ type Note struct {
 type Interaction struct {
 	ID           int       `json:"id"`
 	ConnectionID string    `json:"connection_id"`
-	Type         string    `json:"type"`
 	Content      string    `json:"content"`
-	PhotoURL     *string   `json:"photo_url"`
 	CreatedAt    time.Time `json:"created_at"`
 }

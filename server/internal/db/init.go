@@ -66,15 +66,15 @@ CREATE TABLE IF NOT EXISTS notes (
     connection_id TEXT NOT NULL,
     content TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (connection_id) REFERENCES connections(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS interactions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     connection_id TEXT NOT NULL,
-    type TEXT NOT NULL,
     content TEXT NOT NULL,
-    photo_url TEXT,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (connection_id) REFERENCES connections(id) ON DELETE CASCADE
 );
