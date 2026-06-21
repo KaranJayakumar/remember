@@ -14,24 +14,26 @@ func RegisterRoutes(
 	interactionHandler *handlers.InteractionHandler,
 	uploadHandler *handlers.UploadHandler,
 ) {
-	router.GET("/test", func(c *gin.Context) {
+	defaultGroup := router.Group("")
+	defaultGroup.Use(middleware.AuthMiddleware())
+	defaultGroup.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
 
-	router.GET("/workspaces", middleware.AuthMiddleware(), workspaceHandler.List)
+	defaultGroup.GET("/workspaces", workspaceHandler.List)
 
-	router.GET("/workspaces/:workspace_id/connections", middleware.AuthMiddleware(), connectionHandler.List)
-	router.POST("/workspaces/:workspace_id/connections", middleware.AuthMiddleware(), connectionHandler.Create)
-	router.GET("/connections/:connection_id", middleware.AuthMiddleware(), connectionHandler.Get)
-	router.DELETE("/connections/:connection_id", middleware.AuthMiddleware(), connectionHandler.Delete)
+	defaultGroup.GET("/workspaces/:workspace_id/connections", connectionHandler.List)
+	defaultGroup.POST("/workspaces/:workspace_id/connections", connectionHandler.Create)
+	defaultGroup.GET("/connections/:connection_id", connectionHandler.Get)
+	defaultGroup.DELETE("/connections/:connection_id", connectionHandler.Delete)
 
-	router.POST("/connections/:connection_id/notes", middleware.AuthMiddleware(), noteHandler.Create)
-	router.GET("/connections/:connection_id/notes", middleware.AuthMiddleware(), noteHandler.List)
-	router.DELETE("/notes/:note_id", middleware.AuthMiddleware(), noteHandler.Delete)
+	defaultGroup.POST("/connections/:connection_id/notes", noteHandler.Create)
+	defaultGroup.GET("/connections/:connection_id/notes", noteHandler.List)
+	defaultGroup.DELETE("/notes/:note_id", noteHandler.Delete)
 
-	router.POST("/connections/:connection_id/interactions", middleware.AuthMiddleware(), interactionHandler.Create)
-	router.GET("/connections/:connection_id/interactions", middleware.AuthMiddleware(), interactionHandler.List)
-	router.DELETE("/interactions/:interaction_id", middleware.AuthMiddleware(), interactionHandler.Delete)
+	defaultGroup.POST("/connections/:connection_id/interactions", interactionHandler.Create)
+	defaultGroup.GET("/connections/:connection_id/interactions", interactionHandler.List)
+	defaultGroup.DELETE("/interactions/:interaction_id", interactionHandler.Delete)
 
-	router.POST("/upload/url", middleware.AuthMiddleware(), uploadHandler.GetPresignedURL)
+	defaultGroup.POST("/upload/url", uploadHandler.GetPresignedURL)
 }
