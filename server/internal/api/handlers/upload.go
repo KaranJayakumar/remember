@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -13,20 +13,31 @@ import (
 	"github.com/google/uuid"
 )
 
-// PresignedURLRequest represents the request for a presigned URL
-type PresignedURLRequest struct {
+type S3Client struct {
+	PresignClient  *s3.PresignClient
+	Bucket         string
+	PublicEndpoint string
+}
+
+type UploadHandler struct {
+	s3Client *S3Client
+}
+
+func NewUploadHandler(s3Client *S3Client) *UploadHandler {
+	return &UploadHandler{s3Client: s3Client}
+}
+
+type presignURLRequest struct {
 	ContentType string `json:"contentType" binding:"required"`
 }
 
-// PresignedURLResponse represents the response with presigned URL
-type PresignedURLResponse struct {
+type presignURLResponse struct {
 	UploadURL string `json:"uploadURL"`
 	Key       string `json:"key"`
 	PublicURL string `json:"publicURL"`
 }
 
-// GetPresignedUploadURL generates a presigned URL for direct S3 upload
-func GetPresignedUploadURL(s3Client *S3Client) gin.HandlerFunc {
+func (h *UploadHandler) GetPresignedURL() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		claims, exists := c.Get("claims")
 		if !exists {
@@ -40,18 +51,16 @@ func GetPresignedUploadURL(s3Client *S3Client) gin.HandlerFunc {
 		}
 		userID := sessionClaims.Subject
 
-		var body PresignedURLRequest
+		var body presignURLRequest
 		if err := c.ShouldBindJSON(&body); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request: " + err.Error()})
 			return
 		}
 
-		// Generate unique key for the image
 		key := fmt.Sprintf("profile-pictures/%s/%s", userID, uuid.New().String())
 
-		// Generate presigned URL for PUT operation using the public-facing endpoint
-		presignedReq, err := s3Client.PresignClient.PresignPutObject(context.Background(), &s3.PutObjectInput{
-			Bucket:      aws.String(s3Client.Bucket),
+		presignedReq, err := h.s3Client.PresignClient.PresignPutObject(context.Background(), &s3.PutObjectInput{
+			Bucket:      aws.String(h.s3Client.Bucket),
 			Key:         aws.String(key),
 			ContentType: aws.String(body.ContentType),
 		}, s3.WithPresignExpires(15*time.Minute))
@@ -61,13 +70,12 @@ func GetPresignedUploadURL(s3Client *S3Client) gin.HandlerFunc {
 			return
 		}
 
-		// Construct the public URL for the file (how it will be accessible)
 		publicURL := fmt.Sprintf("%s/%s/%s",
-			s3Client.PublicEndpoint,
-			s3Client.Bucket,
+			h.s3Client.PublicEndpoint,
+			h.s3Client.Bucket,
 			key)
 
-		c.JSON(http.StatusOK, PresignedURLResponse{
+		c.JSON(http.StatusOK, presignURLResponse{
 			UploadURL: presignedReq.URL,
 			Key:       key,
 			PublicURL: publicURL,

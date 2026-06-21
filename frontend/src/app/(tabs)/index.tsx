@@ -11,15 +11,15 @@ export default function Homepage() {
   const { connections } = useConnections();
   const [filteredConnections, setFilteredConnections] = useState<Connection[]>([])
   useEffect(() => {
-    setFilteredConnections(connections)
+    setFilteredConnections(connections || [])
   }, [connections])
 
   const onSearch = (searchTerm : string) => {
     if(!searchTerm || searchTerm.length == 0){
-      setFilteredConnections(connections)
+      setFilteredConnections(connections || [])
       return
     }
-    let searchResults = filteredConnections.filter((connection) => {
+    let searchResults = (connections || []).filter((connection) => {
       return connection.name.toLowerCase().includes(searchTerm)
     })
     setFilteredConnections(searchResults)

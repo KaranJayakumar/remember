@@ -1,70 +1,47 @@
 package main
 
 import (
-	"context"
-	"github.com/KaranJayakumar/remember/ent"
-	"github.com/KaranJayakumar/remember/ent/migrate"
+	"log"
+	"os"
+
+	"github.com/KaranJayakumar/remember/internal/api"
+	"github.com/KaranJayakumar/remember/internal/api/handlers"
+	"github.com/KaranJayakumar/remember/internal/db"
+	"github.com/KaranJayakumar/remember/internal/repository"
+	"github.com/KaranJayakumar/remember/internal/service"
+	s3pkg "github.com/KaranJayakumar/remember/pkg/s3"
 	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	_ "modernc.org/sqlite"
-	_ "github.com/lib/pq"
-	"entgo.io/ent/dialect"
-	"log"
-	"net/http"
-	"os"
-	"database/sql"
-	"database/sql/driver"
-	"modernc.org/sqlite"
 )
 
 func main() {
-	setupServer()
-}
-
-type sqlite3Driver struct {
-	*sqlite.Driver
-}
-
-type sqlite3DriverConn interface {
-	Exec(string, []driver.Value) (driver.Result, error)
-}
-
-func (d sqlite3Driver) Open(name string) (conn driver.Conn, err error) {
-	conn, err = d.Driver.Open(name)
-	if err != nil {
-		return
-	}
-	_, err = conn.(sqlite3DriverConn).Exec("PRAGMA foreign_keys = ON;", nil)
-	if err != nil {
-		_ = conn.Close()
-	}
-	return
-}
-
-func initNativeGolangDBDriver() {
-	sql.Register("sqlite3", sqlite3Driver{Driver: &sqlite.Driver{}})
-}
-
-func setupServer() {
-	initNativeGolangDBDriver()
-
-	client, err := ent.Open(dialect.SQLite, "file:data/ent.db?cache=shared&_fk=1")
-
-	if err != nil {
-		log.Fatalf("failed connecting to postgres: %v", err)
-
-	}
-
-	defer client.Close()
-	ctx := context.Background()
-	if err := client.Schema.Create(ctx, migrate.WithDropIndex(true), migrate.WithDropColumn(true)); err != nil {
-		log.Fatalf("failed printing schema changes: %v", err)
-	}
 	clerk.SetKey(os.Getenv("CLERK_SECRET_KEY"))
 
-	// Initialize S3 client
-	s3Client := NewS3Client()
+	database := db.Init()
+	defer database.Close()
+
+	s3Client := s3pkg.NewClient()
+
+	workspaceRepo := repository.NewWorkspaceRepository(database)
+	connectionRepo := repository.NewConnectionRepository(database)
+	noteRepo := repository.NewNoteRepository(database)
+	interactionRepo := repository.NewInteractionRepository(database)
+
+	workspaceService := service.NewWorkspaceService(workspaceRepo)
+	connectionService := service.NewConnectionService(connectionRepo, noteRepo, interactionRepo)
+	noteService := service.NewNoteService(noteRepo)
+	interactionService := service.NewInteractionService(interactionRepo)
+
+	workspaceHandler := handlers.NewWorkspaceHandler(workspaceService)
+	connectionHandler := handlers.NewConnectionHandler(connectionService)
+	noteHandler := handlers.NewNoteHandler(noteService)
+	interactionHandler := handlers.NewInteractionHandler(interactionService)
+	uploadHandler := handlers.NewUploadHandler(&handlers.S3Client{
+		PresignClient:  s3Client.PresignClient,
+		Bucket:         s3Client.Bucket,
+		PublicEndpoint: s3Client.PublicEndpoint,
+	})
 
 	router := gin.Default()
 	config := cors.DefaultConfig()
@@ -73,36 +50,8 @@ func setupServer() {
 	config.AllowHeaders = []string{"Content-Type", "Authorization"}
 	router.Use(cors.New(config))
 
-	router.GET("/test", Test(client))
+	api.RegisterRoutes(router, workspaceHandler, connectionHandler, noteHandler, interactionHandler, uploadHandler)
 
-	router.GET("/workspaces", AuthMiddleware(), GetWorkspaces(client))
-
-	router.GET("/workspaces/:workspace_id/connections", AuthMiddleware(), GetConnections(client))
-	router.POST("/workspaces/:workspace_id/connections", AuthMiddleware(), CreateConnection(client))
-	router.DELETE("/connections/:connection_id", AuthMiddleware(), DeleteConnection(client))
-
-	router.POST("/connections/:connection_id/notes", AuthMiddleware(), CreateNote(client))
-	router.GET("/connections/:connection_id/notes", AuthMiddleware(), GetNotes(client))
-
-	router.PUT("/notes/:note_id", AuthMiddleware(), UpdateNote(client))
-	router.DELETE("/notes/:note_id", AuthMiddleware(), DeleteNote(client))
-
-	router.POST("/connections/:connection_id/tags", AuthMiddleware(), CreateTag(client))
-	router.GET("/connections/:connection_id/tags", AuthMiddleware(), GetTags(client))
-
-	router.PUT("/tags/:tag_id", AuthMiddleware(), UpdateTag(client))
-	router.DELETE("/tags/:tag_id", AuthMiddleware(), DeleteTag(client))
-
-	// Upload route
-	router.POST("/upload/url", AuthMiddleware(), GetPresignedUploadURL(s3Client))
-
+	log.Println("[server] listening on :4444")
 	router.Run(":4444")
-
-}
-
-func Test(client *ent.Client) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		log.Println("GOT THE REQUEST")
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
-	}
 }

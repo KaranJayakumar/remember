@@ -20,9 +20,10 @@ export const useConnections = () => {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["connections"],
+    queryKey: ["connections", workspace?.id],
     initialData: [],
     queryFn: getConnections,
+    enabled: !!workspace?.id,
   });
 
   const createConnectionMutation = useMutation({
