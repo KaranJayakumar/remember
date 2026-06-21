@@ -19,6 +19,7 @@ export const useWorkspace = () => {
   } = useQuery({
     queryKey: ["workspaces"],
     queryFn: getWorkspaces,
+    initialData: [],
   });
 
   const workspace = workspaces && workspaces.length > 0 ? workspaces[0] : undefined;
