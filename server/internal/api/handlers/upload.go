@@ -37,48 +37,46 @@ type presignURLResponse struct {
 	PublicURL string `json:"publicURL"`
 }
 
-func (h *UploadHandler) GetPresignedURL() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		claims, exists := c.Get("claims")
-		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-			return
-		}
-		sessionClaims, ok := claims.(*clerk.SessionClaims)
-		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-			return
-		}
-		userID := sessionClaims.Subject
-
-		var body presignURLRequest
-		if err := c.ShouldBindJSON(&body); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request: " + err.Error()})
-			return
-		}
-
-		key := fmt.Sprintf("profile-pictures/%s/%s", userID, uuid.New().String())
-
-		presignedReq, err := h.s3Client.PresignClient.PresignPutObject(context.Background(), &s3.PutObjectInput{
-			Bucket:      aws.String(h.s3Client.Bucket),
-			Key:         aws.String(key),
-			ContentType: aws.String(body.ContentType),
-		}, s3.WithPresignExpires(15*time.Minute))
-
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate presigned URL: " + err.Error()})
-			return
-		}
-
-		publicURL := fmt.Sprintf("%s/%s/%s",
-			h.s3Client.PublicEndpoint,
-			h.s3Client.Bucket,
-			key)
-
-		c.JSON(http.StatusOK, presignURLResponse{
-			UploadURL: presignedReq.URL,
-			Key:       key,
-			PublicURL: publicURL,
-		})
+func (h *UploadHandler) GetPresignedURL(c *gin.Context) {
+	claims, exists := c.Get("claims")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
 	}
+	sessionClaims, ok := claims.(*clerk.SessionClaims)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	userID := sessionClaims.Subject
+
+	var body presignURLRequest
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request: " + err.Error()})
+		return
+	}
+
+	key := fmt.Sprintf("profile-pictures/%s/%s", userID, uuid.New().String())
+
+	presignedReq, err := h.s3Client.PresignClient.PresignPutObject(context.Background(), &s3.PutObjectInput{
+		Bucket:      aws.String(h.s3Client.Bucket),
+		Key:         aws.String(key),
+		ContentType: aws.String(body.ContentType),
+	}, s3.WithPresignExpires(15*time.Minute))
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate presigned URL: " + err.Error()})
+		return
+	}
+
+	publicURL := fmt.Sprintf("%s/%s/%s",
+		h.s3Client.PublicEndpoint,
+		h.s3Client.Bucket,
+		key)
+
+	c.JSON(http.StatusOK, presignURLResponse{
+		UploadURL: presignedReq.URL,
+		Key:       key,
+		PublicURL: publicURL,
+	})
 }
