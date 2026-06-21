@@ -30,7 +30,7 @@ export default function Homepage() {
   };
 
   return (
-    <View className="flex-1 flex-col items-center px-6 pt-16">
+    <View className="flex-1 flex-col items-center px-6 pt-4 bg-white">
       <View className="w-full">
         <ContactSearchBar onChange={onSearch}/>
         <View className="mt-4">
