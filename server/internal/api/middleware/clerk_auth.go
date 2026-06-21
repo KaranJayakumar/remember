@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func ClerkAuthMiddleware() gin.HandlerFunc {
+func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
