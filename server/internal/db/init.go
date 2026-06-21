@@ -9,12 +9,12 @@ import (
 
 	_ "modernc.org/sqlite"
 )
+
 const DatabaseFilePath = "data/remember.db"
 
 func Init() *sql.DB {
 	dbPath := DatabaseFilePath
 
-	// Ensure directory exists
 	dir := filepath.Dir(dbPath)
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		log.Fatalf("failed to create data directory: %v", err)
@@ -29,7 +29,6 @@ func Init() *sql.DB {
 		log.Fatalf("failed to ping database: %v", err)
 	}
 
-	// Enable foreign keys
 	if _, err := db.Exec("PRAGMA foreign_keys = ON"); err != nil {
 		log.Fatalf("failed to enable foreign keys: %v", err)
 	}
@@ -66,15 +65,15 @@ CREATE TABLE IF NOT EXISTS notes (
     connection_id TEXT NOT NULL,
     content TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (connection_id) REFERENCES connections(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS interactions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     connection_id TEXT NOT NULL,
+    type TEXT NOT NULL,
     content TEXT NOT NULL,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    photo_url TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (connection_id) REFERENCES connections(id) ON DELETE CASCADE
 );

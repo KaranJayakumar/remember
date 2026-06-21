@@ -1,40 +1,37 @@
 package api
 
 import (
-	"log"
-	"net/http"
+	"github.com/KaranJayakumar/remember/internal/api/handlers"
 	"github.com/KaranJayakumar/remember/internal/api/middleware"
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterRoutes(router *gin.Engine){
-	router.GET("/health", Test())
-	router.GET("/workspaces", middleware.ClerkAuthMiddleware(), GetWorkspaces())
+func RegisterRoutes(
+	router *gin.Engine,
+	workspaceHandler *handlers.WorkspaceHandler,
+	connectionHandler *handlers.ConnectionHandler,
+	noteHandler *handlers.NoteHandler,
+	interactionHandler *handlers.InteractionHandler,
+	uploadHandler *handlers.UploadHandler,
+) {
+	router.GET("/test", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "ok"})
+	})
 
-	router.GET("/workspaces/:workspace_id/connections", middleware.ClerkAuthMiddleware(), GetConnections())
-	router.POST("/workspaces/:workspace_id/connections", middleware.ClerkAuthMiddleware(), CreateConnection())
-	router.DELETE("/connections/:connection_id", middleware.ClerkAuthMiddleware(), DeleteConnection())
+	router.GET("/workspaces", middleware.ClerkAuthMiddleware(), workspaceHandler.List())
 
-	router.POST("/connections/:connection_id/notes", middleware.ClerkAuthMiddleware(), CreateNote())
-	router.GET("/connections/:connection_id/notes", middleware.ClerkAuthMiddleware(), GetNotes())
+	router.GET("/workspaces/:workspace_id/connections", middleware.ClerkAuthMiddleware(), connectionHandler.List())
+	router.POST("/workspaces/:workspace_id/connections", middleware.ClerkAuthMiddleware(), connectionHandler.Create())
+	router.GET("/connections/:connection_id", middleware.ClerkAuthMiddleware(), connectionHandler.Get())
+	router.DELETE("/connections/:connection_id", middleware.ClerkAuthMiddleware(), connectionHandler.Delete())
 
-	router.PUT("/notes/:note_id", middleware.ClerkAuthMiddleware(), UpdateNote())
-	router.DELETE("/notes/:note_id", middleware.ClerkAuthMiddleware(), DeleteNote())
+	router.POST("/connections/:connection_id/notes", middleware.ClerkAuthMiddleware(), noteHandler.Create())
+	router.GET("/connections/:connection_id/notes", middleware.ClerkAuthMiddleware(), noteHandler.List())
+	router.DELETE("/notes/:note_id", middleware.ClerkAuthMiddleware(), noteHandler.Delete())
 
-	router.POST("/connections/:connection_id/tags", middleware.ClerkAuthMiddleware(), CreateTag())
-	router.GET("/connections/:connection_id/tags", middleware.ClerkAuthMiddleware(), GetTags())
+	router.POST("/connections/:connection_id/interactions", middleware.ClerkAuthMiddleware(), interactionHandler.Create())
+	router.GET("/connections/:connection_id/interactions", middleware.ClerkAuthMiddleware(), interactionHandler.List())
+	router.DELETE("/interactions/:interaction_id", middleware.ClerkAuthMiddleware(), interactionHandler.Delete())
 
-	router.PUT("/tags/:tag_id", middleware.ClerkAuthMiddleware(), UpdateTag())
-	router.DELETE("/tags/:tag_id", middleware.ClerkAuthMiddleware(), DeleteTag())
-
-	// Upload route
-	router.POST("/upload/url", middleware.ClerkAuthMiddleware(), GetPresignedUploadURL())
-
-
-}
-func Test() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		log.Println("[healthcheck] Request received")
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
-	}
+	router.POST("/upload/url", middleware.ClerkAuthMiddleware(), uploadHandler.GetPresignedURL())
 }
