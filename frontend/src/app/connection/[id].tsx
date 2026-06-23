@@ -1,23 +1,23 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ActivityIndicator, Alert, ScrollView, View } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { useConnections } from "~/hooks/useConnections";
 import { useNotes } from "~/hooks/useNotes";
-import { useTags } from "~/hooks/useTags";
+import { useInteractions } from "~/hooks/useInteractions";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Text } from "~/components/ui/text";
 import { ProfileImage } from "~/components/ui/profile-image";
-import { ChevronLeft, Trash2, X, Plus } from "lucide-react-native";
+import { ChevronLeft, Trash2, Plus } from "lucide-react-native";
 
 export default function ConnectionDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { connections, isLoading: connectionsLoading, deleteConnection, refetch } = useConnections();
   const { createNote, getNotes } = useNotes();
-  const { createTag, deleteTag, getTags } = useTags();
+  const { createInteraction, getInteractions } = useInteractions();
 
   const connection = connections.find((c) => c.id === id);
 
@@ -31,20 +31,20 @@ export default function ConnectionDetail() {
   });
 
   const {
-    data: tags,
-    isLoading: tagsLoading,
+    data: interactions,
+    isLoading: interactionsLoading,
   } = useQuery({
-    queryKey: ["tags", id],
-    queryFn: () => getTags(id),
+    queryKey: ["interactions", id],
+    queryFn: () => getInteractions(id),
     enabled: !!id,
   });
 
   const [note, setNote] = useState("");
-  const [tagName, setTagName] = useState("");
-  const [tagValue, setTagValue] = useState("");
+  const [interactionType, setInteractionType] = useState("note");
+  const [interactionContent, setInteractionContent] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isAddingTag, setIsAddingTag] = useState(false);
+  const [isAddingInteraction, setIsAddingInteraction] = useState(false);
 
   if (connectionsLoading) {
     return (
@@ -65,6 +65,8 @@ export default function ConnectionDetail() {
     );
   }
 
+  const displayName = `${connection.first_name} ${connection.last_name}`.trim();
+
   const handleAddNote = async () => {
     if (!note.trim()) return;
     setIsSaving(true);
@@ -79,45 +81,27 @@ export default function ConnectionDetail() {
     }
   };
 
-  const handleAddTag = async () => {
-    if (!tagName.trim() || !tagValue.trim()) {
-      Alert.alert("Error", "Please enter both a tag name and value");
+  const handleAddInteraction = async () => {
+    if (!interactionContent.trim()) {
+      Alert.alert("Error", "Please enter interaction details");
       return;
     }
-    setIsAddingTag(true);
+    setIsAddingInteraction(true);
     try {
-      await createTag(id, tagName.trim(), tagValue.trim());
-      setTagName("");
-      setTagValue("");
-      Alert.alert("Success", "Tag added");
+      await createInteraction(id, interactionType, interactionContent.trim());
+      setInteractionContent("");
+      Alert.alert("Success", "Interaction logged");
     } catch (err: any) {
-      Alert.alert("Error", err.message || "Failed to add tag");
+      Alert.alert("Error", err.message || "Failed to log interaction");
     } finally {
-      setIsAddingTag(false);
+      setIsAddingInteraction(false);
     }
-  };
-
-  const handleRemoveTag = (tagId: string) => {
-    Alert.alert("Remove Tag", "Are you sure you want to remove this tag?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Remove",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await deleteTag(tagId);
-          } catch (err: any) {
-            Alert.alert("Error", err.message || "Failed to remove tag");
-          }
-        },
-      },
-    ]);
   };
 
   const handleDelete = async () => {
     Alert.alert(
       "Delete Connection",
-      `Are you sure you want to delete ${connection.name}? This cannot be undone.`,
+      `Are you sure you want to delete ${displayName}? This cannot be undone.`,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -139,8 +123,8 @@ export default function ConnectionDetail() {
     );
   };
 
-  const allNotes = notes || connection.edges?.notes || [];
-  const allTags = tags || connection.edges?.tags || [];
+  const allNotes = notes || connection.notes || [];
+  const allInteractions = interactions || connection.interactions || [];
 
   return (
     <ScrollView className="flex-1 bg-background">
@@ -157,58 +141,49 @@ export default function ConnectionDetail() {
 
         <View className="items-center gap-3">
           <ProfileImage imageUri={connection.image_url} size={96} />
-          <Text className="text-3xl font-bold text-foreground">{connection.name}</Text>
+          <Text className="text-3xl font-bold text-foreground">{displayName}</Text>
         </View>
 
         <View className="gap-4">
-          <Label>Tags</Label>
-          {tagsLoading ? (
+          <Label>Interactions</Label>
+          {interactionsLoading ? (
             <ActivityIndicator />
-          ) : allTags.length > 0 ? (
-            <View className="flex-row flex-wrap gap-2">
-              {allTags.map((tag) => (
+          ) : allInteractions.length > 0 ? (
+            <View className="gap-2">
+              {allInteractions.map((i, idx) => (
                 <View
-                  key={tag.id}
-                  className="flex-row items-center gap-1 px-3 py-1 rounded-full bg-secondary"
+                  key={i.id || idx}
+                  className="border rounded-xl p-4 bg-card"
                 >
-                  <Text className="text-xs text-secondary-foreground">
-                    {tag.name}: {tag.value}
-                  </Text>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onPress={() => handleRemoveTag(tag.id)}
-                    className="h-5 w-5 p-0"
-                  >
-                    <X size={12} className="text-secondary-foreground" />
-                  </Button>
+                  <Text className="text-sm font-medium text-card-foreground">{i.type}</Text>
+                  <Text className="text-sm text-card-foreground">{i.content}</Text>
                 </View>
               ))}
             </View>
           ) : (
-            <Text className="text-muted-foreground text-sm">No tags yet</Text>
+            <Text className="text-muted-foreground text-sm">No interactions yet</Text>
           )}
 
           <View className="flex-row gap-2">
             <Input
-              placeholder="Tag name"
-              value={tagName}
-              onChangeText={setTagName}
+              placeholder="Type (e.g. coffee, call)"
+              value={interactionType}
+              onChangeText={setInteractionType}
               className="flex-1"
             />
             <Input
-              placeholder="Tag value"
-              value={tagValue}
-              onChangeText={setTagValue}
+              placeholder="What happened?"
+              value={interactionContent}
+              onChangeText={setInteractionContent}
               className="flex-1"
             />
             <Button
               variant="outline"
               size="icon"
-              onPress={handleAddTag}
-              disabled={isAddingTag}
+              onPress={handleAddInteraction}
+              disabled={isAddingInteraction}
             >
-              {isAddingTag ? (
+              {isAddingInteraction ? (
                 <ActivityIndicator size="small" />
               ) : (
                 <Plus size={16} className="text-foreground" />

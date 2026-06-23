@@ -19,8 +19,10 @@ export default function Homepage() {
       setFilteredConnections(connections || [])
       return
     }
+    const term = searchTerm.toLowerCase()
     let searchResults = (connections || []).filter((connection) => {
-      return connection.name.toLowerCase().includes(searchTerm)
+      const fullName = `${connection.first_name} ${connection.last_name}`.toLowerCase()
+      return fullName.includes(term)
     })
     setFilteredConnections(searchResults)
   }
@@ -38,7 +40,8 @@ export default function Homepage() {
             <ConnectionPill
               key={connection.id}
               id={connection.id}
-              name={connection.name}
+              first_name={connection.first_name}
+              last_name={connection.last_name}
               image_url={connection.image_url}
               onPress={handleConnectionPress}
             />
@@ -48,7 +51,3 @@ export default function Homepage() {
     </View>
   );
 }
-
-
-
-

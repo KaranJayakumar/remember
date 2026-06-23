@@ -1,24 +1,24 @@
 export interface Connection {
   id: string;
-  name: string;
+  first_name: string;
+  last_name: string;
   image_url: string;
   workspace_id: string;
-  edges: {
-    notes?: Note[];
-    tags?: Tag[];
-    workspace?: Workspace;
-  };
-}
-
-export interface Tag {
-  id: string;
-  name: string;
-  value: string;
+  notes?: Note[];
+  interactions?: Interaction[];
 }
 
 export interface Note {
-  id: string;
+  id: number;
   content: string;
+  created_at: string;
+}
+
+export interface Interaction {
+  id: number;
+  type: string;
+  content: string;
+  photo_url: string;
   created_at: string;
 }
 

@@ -18,7 +18,7 @@ func NewConnectionRepository(db DBTX) *ConnectionRepository {
 
 func (r *ConnectionRepository) ListByWorkspace(ctx context.Context, workspaceID string) ([]models.Connection, error) {
 	rows, err := r.db.QueryContext(ctx,
-		"SELECT id, workspace_id, first_name,last_name image_url, metadata, created_at, updated_at FROM connections WHERE workspace_id = ?",
+		"SELECT id, workspace_id, first_name, last_name, image_url, metadata, created_at, updated_at FROM connections WHERE workspace_id = ?",
 		workspaceID,
 	)
 	if err != nil {
@@ -40,7 +40,7 @@ func (r *ConnectionRepository) ListByWorkspace(ctx context.Context, workspaceID 
 func (r *ConnectionRepository) GetByID(ctx context.Context, id string) (*models.Connection, error) {
 	var c models.Connection
 	err := r.db.QueryRowContext(ctx,
-		"SELECT id, workspace_id, name, image_url, metadata, created_at, updated_at FROM connections WHERE id = ?",
+		"SELECT id, workspace_id, first_name, last_name, image_url, metadata, created_at, updated_at FROM connections WHERE id = ?",
 		id,
 	).Scan(&c.ID, &c.WorkspaceID, &c.FirstName, &c.LastName, &c.ImageURL, &c.Metadata, &c.CreatedAt, &c.UpdatedAt)
 	if err != nil {

@@ -30,11 +30,10 @@ export const useConnections = () => {
     mutationFn: async ({
       firstName,
       lastName,
-      tags,
       imageUrl,
     }: {
-      name: string;
-      tags?: Record<string, string>;
+      firstName: string;
+      lastName: string;
       imageUrl?: string;
     }) => {
       const token = await getToken();

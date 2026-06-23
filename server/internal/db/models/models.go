@@ -11,8 +11,8 @@ type Workspace struct {
 type Connection struct {
 	ID           string        `json:"id"`
 	WorkspaceID  string        `json:"workspace_id"`
-	FirstName         string        `json:"first_name"`
-	LastName         string        `json:"last_name"`
+	FirstName    string        `json:"first_name"`
+	LastName     string        `json:"last_name"`
 	ImageURL     *string       `json:"image_url"`
 	Metadata     *string       `json:"metadata"`
 	CreatedAt    *time.Time    `json:"created_at"`
