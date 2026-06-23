@@ -28,7 +28,8 @@ export const useConnections = () => {
 
   const createConnectionMutation = useMutation({
     mutationFn: async ({
-      name,
+      firstName,
+      lastName,
       tags,
       imageUrl,
     }: {
@@ -38,7 +39,7 @@ export const useConnections = () => {
     }) => {
       const token = await getToken();
       if (!token) throw new Error("Missing token");
-      return createConnectionApi({ token, name, tags, imageUrl, workspaceId: workspace?.id || "" });
+      return createConnectionApi({ token, firstName, lastName, imageUrl, workspaceId: workspace?.id || "" });
     },
   });
 
@@ -50,8 +51,8 @@ export const useConnections = () => {
     },
   });
 
-  const createConnection = async (name: string, tags?: Record<string, string>, imageUrl?: string) => {
-    return createConnectionMutation.mutateAsync({ name, tags, imageUrl });
+  const createConnection = async (firstName: string, lastName : string, imageUrl?: string) => {
+    return createConnectionMutation.mutateAsync({ firstName, lastName,  imageUrl });
   };
 
   const deleteConnection = async (connectionId: string) => {

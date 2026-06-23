@@ -18,7 +18,8 @@ func NewConnectionHandler(service *service.ConnectionService) *ConnectionHandler
 }
 
 type createConnectionBody struct {
-	Name     string  `json:"name" binding:"required"`
+	FirstName     string  `json:"firstName" binding:"required"`
+	LastName string  `json:"lastName" binding:"required"`
 	ImageURL *string `json:"imageUrl,omitempty"`
 }
 
@@ -60,7 +61,7 @@ func (h *ConnectionHandler) Create(c *gin.Context) {
 		return
 	}
 
-	conn, err := h.service.Create(c.Request.Context(), workspaceID, body.Name, body.ImageURL)
+	conn, err := h.service.Create(c.Request.Context(), workspaceID, body.FirstName, body.LastName, body.ImageURL)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

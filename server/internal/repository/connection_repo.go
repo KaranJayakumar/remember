@@ -18,7 +18,7 @@ func NewConnectionRepository(db DBTX) *ConnectionRepository {
 
 func (r *ConnectionRepository) ListByWorkspace(ctx context.Context, workspaceID string) ([]models.Connection, error) {
 	rows, err := r.db.QueryContext(ctx,
-		"SELECT id, workspace_id, name, image_url, metadata, created_at, updated_at FROM connections WHERE workspace_id = ?",
+		"SELECT id, workspace_id, first_name,last_name image_url, metadata, created_at, updated_at FROM connections WHERE workspace_id = ?",
 		workspaceID,
 	)
 	if err != nil {
@@ -29,7 +29,7 @@ func (r *ConnectionRepository) ListByWorkspace(ctx context.Context, workspaceID 
 	var connections []models.Connection
 	for rows.Next() {
 		var c models.Connection
-		if err := rows.Scan(&c.ID, &c.WorkspaceID, &c.Name, &c.ImageURL, &c.Metadata, &c.CreatedAt, &c.UpdatedAt); err != nil {
+		if err := rows.Scan(&c.ID, &c.WorkspaceID, &c.FirstName, &c.LastName, &c.ImageURL, &c.Metadata, &c.CreatedAt, &c.UpdatedAt); err != nil {
 			return nil, err
 		}
 		connections = append(connections, c)
@@ -42,18 +42,18 @@ func (r *ConnectionRepository) GetByID(ctx context.Context, id string) (*models.
 	err := r.db.QueryRowContext(ctx,
 		"SELECT id, workspace_id, name, image_url, metadata, created_at, updated_at FROM connections WHERE id = ?",
 		id,
-	).Scan(&c.ID, &c.WorkspaceID, &c.Name, &c.ImageURL, &c.Metadata, &c.CreatedAt, &c.UpdatedAt)
+	).Scan(&c.ID, &c.WorkspaceID, &c.FirstName, &c.LastName, &c.ImageURL, &c.Metadata, &c.CreatedAt, &c.UpdatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("get connection: %w", err)
 	}
 	return &c, nil
 }
 
-func (r *ConnectionRepository) Create(ctx context.Context, workspaceID, name string, imageURL *string) (*models.Connection, error) {
+func (r *ConnectionRepository) Create(ctx context.Context, workspaceID, firstName string, lastName string, imageURL *string) (*models.Connection, error) {
 	id := uuid.New().String()
 	_, err := r.db.ExecContext(ctx,
-		"INSERT INTO connections (id, workspace_id, name, image_url) VALUES (?, ?, ?, ?)",
-		id, workspaceID, name, imageURL,
+		"INSERT INTO connections (id, workspace_id, first_name, last_name, image_url) VALUES (?, ?, ?, ?, ?)",
+		id, workspaceID, firstName, lastName, imageURL,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("insert connection: %w", err)

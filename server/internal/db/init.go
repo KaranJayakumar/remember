@@ -52,7 +52,9 @@ CREATE TABLE IF NOT EXISTS workspaces (
 CREATE TABLE IF NOT EXISTS connections (
     id TEXT PRIMARY KEY,
     workspace_id TEXT NOT NULL,
-    name TEXT NOT NULL,
+    first_name TEXT NOT NULL,
+    middle_name TEXT,
+    last_name TEXT,
     image_url TEXT,
     metadata TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

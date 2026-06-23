@@ -28,14 +28,14 @@ export async function getConnectionsApi({
 
 export async function createConnectionApi({
   token,
-  name,
-  tags,
+  firstName,
+  lastName,
   imageUrl,
   workspaceId,
 }: {
   token: string;
-  name: string;
-  tags?: Record<string, string>;
+  firstName: string;
+  lastName: string;
   imageUrl?: string;
   workspaceId: string;
 }) {
@@ -48,8 +48,8 @@ export async function createConnectionApi({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        name,
-        tags,
+        firstName,
+        lastName,
         imageUrl,
       }),
     },

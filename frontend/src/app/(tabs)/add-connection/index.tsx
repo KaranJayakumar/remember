@@ -25,7 +25,6 @@ export default function AddConnection() {
       notes: ['']
     },
     onSubmit: async ({ value }) => {
-      const name = `${value.firstName.trim()} ${value.lastName.trim()}`.trim();
       if (!name) {
         Alert.alert('Error', 'Please enter a name');
         return;
@@ -37,7 +36,7 @@ export default function AddConnection() {
           imageUrl = await uploadImage(value.imageUri, 'image/jpeg');
         }
 
-        const connection = await createConnection(name, undefined, imageUrl);
+        const connection = await createConnection(value.firstName.trim(), value.lastName.trim(), imageUrl);
         const connectionId = connection.id;
 
         const validNotes = value.notes.filter((n) => n.trim().length > 0);

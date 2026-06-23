@@ -33,8 +33,8 @@ func (s *ConnectionService) GetByID(ctx context.Context, id string) (*models.Con
 	return conn, nil
 }
 
-func (s *ConnectionService) Create(ctx context.Context, workspaceID, name string, imageURL *string) (*models.Connection, error) {
-	return s.connRepo.Create(ctx, workspaceID, name, imageURL)
+func (s *ConnectionService) Create(ctx context.Context, workspaceID, firstName string, lastName string, imageURL *string) (*models.Connection, error) {
+	return s.connRepo.Create(ctx, workspaceID, firstName, lastName, imageURL)
 }
 
 func (s *ConnectionService) Delete(ctx context.Context, id string) error {
