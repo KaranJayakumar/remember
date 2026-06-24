@@ -31,3 +31,7 @@ server/bin/*
 
 # Tmp files
 /server/tmp/*
+
+# Expo Android + IOS
+/frontend/ios/*
+/frontend/android/*
