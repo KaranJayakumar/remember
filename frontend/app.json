@@ -14,7 +14,7 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "bundleIdentifier" : "com.karanjaykumar.remember",
+      "bundleIdentifier": "com.karanjaykumar.remember",
       "supportsTablet": true
     },
     "android": {
@@ -22,7 +22,8 @@
         "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.karanjaykumar.remember"
     },
     "web": {
       "favicon": "./src/assets/favicon.png"
