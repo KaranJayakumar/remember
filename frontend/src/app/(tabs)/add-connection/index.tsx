@@ -9,13 +9,11 @@ import { Label } from "~/components/ui/label";
 import { Text } from "~/components/ui/text";
 import { ChooseProfileImage } from "~/components/ui/choose-profile-image";
 import { useConnections } from "~/hooks/useConnections";
-import { useNotes } from "~/hooks/useNotes";
 
 export default function AddConnection() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { createConnection, uploadImage } = useConnections();
-  const { createNote } = useNotes();
 
   const form = useForm({
     defaultValues: {
@@ -25,11 +23,6 @@ export default function AddConnection() {
       notes: ['']
     },
     onSubmit: async ({ value }) => {
-      if (!name) {
-        Alert.alert('Error', 'Please enter a name');
-        return;
-      }
-
       try {
         let imageUrl: string | undefined;
         if (value.imageUri) {
@@ -38,12 +31,6 @@ export default function AddConnection() {
 
         const connection = await createConnection(value.firstName.trim(), value.lastName.trim(), imageUrl);
         const connectionId = connection.id;
-
-        const validNotes = value.notes.filter((n) => n.trim().length > 0);
-        for (const note of validNotes) {
-          await createNote(connectionId, note.trim());
-        }
-
         await queryClient.invalidateQueries({ queryKey: ["connections"] });
         Alert.alert('Success', 'Connection created!', [
           {
@@ -115,65 +102,6 @@ export default function AddConnection() {
                     </View>
                   )}
                 />
-
-                <View className="gap-4">
-                  <View className="flex-row justify-between items-center">
-                    <Label>Notes</Label>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onPress={() => form.setFieldValue('notes', (prev) => [...prev, ''])}
-                      className="flex-row gap-2 h-9"
-                      disabled={isSubmitting}
-                    >
-                      <Plus size={16} className="text-foreground" />
-                      <Text>Add Note</Text>
-                    </Button>
-                  </View>
-
-                  <form.Subscribe
-                    selector={(state) => state.values.notes}
-                    children={(notes: any) => (
-                      <View className="gap-3">
-                        {notes.map((note: string, index: number) => (
-                          <form.Field
-                            key={index}
-                            name={`notes[${index}]`}
-                            children={(subField) => (
-                              <View className="flex-row gap-2 items-center">
-                                <View className="flex-1">
-                                  <Input
-                                    placeholder={`Note ${index + 1}`}
-                                    value={subField.state.value}
-                                    onChangeText={subField.handleChange}
-                                    multiline
-                                    className="min-h-[44px] py-2"
-                                    editable={!isSubmitting}
-                                  />
-                                </View>
-                                {notes.length > 1 && (
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onPress={() => {
-                                      const newNotes = [...notes];
-                                      newNotes.splice(index, 1);
-                                      form.setFieldValue('notes', newNotes);
-                                    }}
-                                    className="h-11 w-11"
-                                    disabled={isSubmitting}
-                                  >
-                                    <Trash2 size={20} className="text-destructive" />
-                                  </Button>
-                                )}
-                              </View>
-                            )}
-                          />
-                        ))}
-                      </View>
-                    )}
-                  />
-                </View>
                 <View className="mt-4 gap-4">
                   <Button
                     size="lg"
