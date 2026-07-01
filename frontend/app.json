@@ -32,7 +32,9 @@
       "expo-router",
       "expo-web-browser",
       "expo-secure-store",
-      "expo-dev-client"
+      "expo-dev-client",
+      "expo-image",
+      "expo-splash-screen"
     ],
     "extra": {
       "router": {},
