@@ -1,5 +1,4 @@
 root = "."
-log="stdout"
 
 [build]
   args_bin = []
