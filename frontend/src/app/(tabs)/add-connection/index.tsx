@@ -25,11 +25,6 @@ export default function AddConnection() {
       notes: ['']
     },
     onSubmit: async ({ value }) => {
-      if (!name) {
-        Alert.alert('Error', 'Please enter a name');
-        return;
-      }
-
       try {
         let imageUrl: string | undefined;
         if (value.imageUri) {
